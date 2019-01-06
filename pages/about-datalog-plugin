@@ -1,0 +1,37 @@
+{
+  "title": "About Datalog Plugin",
+  "story": [
+  {
+    "type": "paragraph",
+    "id": "32bfe69985391c1f",
+    "text": "Here we describe the purpose of the plugin and include a sample."
+  },
+  {
+    "type": "datalog",
+    "id": "3f9679d65fe2499c",
+    "text": "This is text in the new plugin. You can *double-click* to edit it too."
+  }
+],
+  "journal": [
+  {
+    "type": "create",
+    "item": {
+      "title": "About Datalog Plugin",
+      "story": [
+  {
+    "type": "paragraph",
+    "id": "32bfe69985391c1f",
+    "text": "Here we describe the purpose of the plugin and include a sample."
+  },
+  {
+    "type": "datalog",
+    "id": "3f9679d65fe2499c",
+    "text": "This is text in the new plugin. You can *double-click* to edit it too."
+  }
+]
+    },
+    "date": 1546799562000,
+    "certificate": "from mkplugin.sh"
+  }
+]
+}
