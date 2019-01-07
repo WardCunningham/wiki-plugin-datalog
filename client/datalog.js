@@ -7,7 +7,8 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      .replace(/\*(.+?)\*/g, '<i>$1</i>');
+      .replace(/\*(.+?)\*/g, '<i>$1</i>')
+      .replace(/\r?\n/g, '<br>')
   };
 
   emit = ($item, item) => {
