@@ -12,6 +12,23 @@
     {name: 'bedroom', site: 'http://home.c2.com:8022'}
   ]
 
+  function decimal(number, digits) {
+    var result = []
+    for (var i = 0; i < digits; i++) {
+      result.push(number % 10)
+      number = Math.floor(number / 10)
+    }
+    return result.reverse().join('')
+  }
+
+  function utc (date) {
+    let y = decimal(date.getUTCFullYear(), 4)
+    let m = decimal(date.getUTCMonth()+1, 2)
+    let d = decimal(date.getUTCDate(), 2)
+    let h = decimal(date.getUTCHours(), 2)
+    return `${y}-${m}-${d}-${h}`
+  }
+
   function startRecorder(assets,slug) {
 
     function mkdir(dir) {
@@ -25,23 +42,9 @@
     mkdir(`${assets}/plugins/datalog`)
     mkdir(`${assets}/plugins/datalog/${slug}`)
 
-    function decimal(number, digits) {
-      var result = []
-      for (var i = 0; i < digits; i++) {
-        result.push(number % 10)
-        number = Math.floor(number / 10)
-      }
-      return result.reverse().join('')
+    function logfile(clock) {
+      return `${assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
     }
-
-    function utc (date) {
-      let y = decimal(date.getUTCFullYear(), 4)
-      let m = decimal(date.getUTCMonth()+1, 2)
-      let d = decimal(date.getUTCDate(), 2)
-      let h = decimal(date.getUTCHours(), 2)
-      return `${y}-${m}-${d}-${h}`
-    }
-
 
     function timeout(duration) {
       // https://stackoverflow.com/a/49857905
@@ -66,8 +69,7 @@
 
     function save(result) {
       let payload = JSON.stringify(result)
-      let logfile = `${assets}/plugins/datalog/${slug}/${utc(new Date(result.clock))}.log`
-      fs.appendFile(logfile, `${payload}\n`)
+      fs.appendFile(logfile(result.clock), `${payload}\n`)
     }
 
     setInterval(sample,5000)
@@ -79,12 +81,23 @@
     var app = params.app,
         argv = params.argv
 
-    startRecorder(argv.assets,'testing-datalog')
+    var slug = 'testing-datalog'
 
-    return app.get('/plugin/datalog/:thing', (req, res) => {
-      let thing = req.params.thing
-      let clock = Date.now()
-      return res.json({thing, clock})
+    var minute = 60000,
+        hour = 60*minute
+
+    function logfile(clock) {
+      return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
+    }
+
+    startRecorder(argv.assets,slug)
+
+    app.get('/plugin/datalog/:slug/current', (req, res) => {
+      return res.sendFile(logfile(Date.now()-minute))
+    })
+
+    app.get('/plugin/datalog/:slug/previous', (req, res) => {
+      return res.sendFile(logfile(Date.now()-hour-minute))
     })
   }
 
