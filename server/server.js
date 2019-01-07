@@ -3,7 +3,14 @@
 
 (function() {
 
-  const fs = require('fs');
+  const fs = require('fs')
+  const fetch = require("node-fetch")
+
+  sensors = [
+    {name: 'desk', site: 'http://home.c2.com:8020'},
+    {name: 'office', site: 'http://home.c2.com:8021'},
+    {name: 'bedroom', site: 'http://home.c2.com:8022'}
+  ]
 
   function startRecorder(assets,slug) {
 
@@ -19,7 +26,7 @@
     mkdir(`${assets}/plugins/datalog/${slug}`)
 
     function decimal(number, digits) {
-      result = []
+      var result = []
       for (var i = 0; i < digits; i++) {
         result.push(number % 10)
         number = Math.floor(number / 10)
@@ -35,10 +42,31 @@
       return `${y}-${m}-${d}-${h}`
     }
 
+
+    function timeout(duration) {
+      // https://stackoverflow.com/a/49857905
+      return new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`timeout after ${duration} msec`)), duration))
+    }
+
     function sample() {
       let clock = Date.now()
-      let payload = JSON.stringify({clock})
-      let logfile = `${assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
+      queries = sensors.map((sensor) =>
+        Promise.race([
+          fetch(sensor.site),
+          timeout(2000)
+        ])
+        .then(response => response.json())
+        .then(json => ({name:sensor.name, data:json}))
+        .catch(error => console.log(error)||{})
+      )
+      Promise.all(queries)
+        .then(result => save({clock,result}))
+    }
+
+    function save(result) {
+      let payload = JSON.stringify(result)
+      let logfile = `${assets}/plugins/datalog/${slug}/${utc(new Date(result.clock))}.log`
       fs.appendFile(logfile, `${payload}\n`)
     }
 
