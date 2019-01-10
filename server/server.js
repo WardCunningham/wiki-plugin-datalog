@@ -99,6 +99,10 @@
     app.get('/plugin/datalog/:slug/previous', (req, res) => {
       return res.sendFile(logfile(Date.now()-hour-minute))
     })
+
+    app.get('/plugin/datalog/:slug/offset/:offset', (req, res) => {
+      return res.sendFile(logfile(Date.now()-hour*req.params.offset))
+    })
   }
 
   module.exports = {startServer}
