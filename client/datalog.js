@@ -1,8 +1,7 @@
 
 (function() {
-  var bind, emit, expand;
 
-  expand = text => {
+  function expand(text) {
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -11,15 +10,15 @@
       .replace(/\r?\n/g, '<br>')
   };
 
-  emit = ($item, item) => {
-    return $item.append(`
+  function emit($item, item) {
+    $item.append(`
       <p style="background-color:#eee;padding:15px;">
         ${expand(item.text)}
       </p>`);
   };
 
-  bind = function($item, item) {
-    return $item.dblclick(() => {
+  function bind($item, item) {
+    $item.dblclick(() => {
       return wiki.textEditor($item, item);
     });
   };
