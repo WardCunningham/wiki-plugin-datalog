@@ -103,6 +103,17 @@
     app.get('/plugin/datalog/:slug/offset/:offset', (req, res) => {
       return res.sendFile(logfile(Date.now()-hour*req.params.offset))
     })
+
+    var status = 'inactive'
+    app.post('/plugin/datalog/:slug/id/:id/', (req, res) => {
+      let command = req.body
+      console.log('command',command)
+      if (command.action) {
+        status = (command.action == 'start') ? 'active' : 'inactive'
+      }
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify({status}));
+    })
   }
 
   module.exports = {startServer}

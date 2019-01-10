@@ -40,7 +40,7 @@
   }
 
   function emit($item, item) {
-    parsed = parse(item.text)
+    let parsed = parse(item.text)
     $item.append(`
       <div style="background-color:#eee; padding:15px; margin-block-start:1em; margin-block-end:1em;">
         ${parsed.output}
@@ -52,7 +52,30 @@
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
     });
-  };
+
+    let $button = $item.find('button')
+    let parsed = parse(item.text)
+
+    function action(command) {
+      $button.prop('disabled',true)
+      $.ajax({
+        type: "POST",
+        url: `/plugin/datalog/${'test-datalog'}/id/${item.id}`,
+        data: JSON.stringify(command),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(data){
+          $button.text((data.status == 'active') ? 'stop' : 'start')
+          $button.prop('disabled',false)
+        },
+        failure: function(err) {
+          console.log(err)
+        }
+      })
+    }
+    $button.click(event => action({action:$button.text(),schedule:parsed.schedule}))
+    action({})
+  }
 
   if (typeof window !== "undefined" && window !== null) {
     window.plugins.datalog = {emit, bind};
