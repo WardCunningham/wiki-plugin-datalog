@@ -24,7 +24,7 @@
         schedule.interval = 3600000*24 / m[1]
       } else if (m = line.match(/^WEEK (\d+)$/)) {
         schedule.chunk = 'week'
-        schedule.interval = 3600000*24 / m[1]
+        schedule.interval = 3600000*24*7 / m[1]
       } else if (m = line.match(/^KEEP (\d+)$/)) {
         schedule.keep = m[1]*1
       } else if (m = line.match(/^SENSOR (\w+) (https?:\S+)$/)) {
