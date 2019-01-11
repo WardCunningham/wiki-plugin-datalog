@@ -12,6 +12,9 @@
     {name: 'bedroom', site: 'http://home.c2.com:8022'}
   ]
 
+  scheds = {} // "slug/item" => schedule
+  timers = {} // "slug/item" => timer
+
   function decimal(number, digits) {
     var result = []
     for (var i = 0; i < digits; i++) {
@@ -29,7 +32,7 @@
     return `${y}-${m}-${d}-${h}`
   }
 
-  function startRecorder(assets,slug) {
+  function readyRecorder(assets,slug) {
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -72,7 +75,7 @@
       fs.appendFile(logfile(result.clock), `${payload}\n`)
     }
 
-    setInterval(sample,5000)
+    return (schedule) => setInterval(sample,5000)
 
   }
 
@@ -90,7 +93,33 @@
       return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
     }
 
-    startRecorder(argv.assets,slug)
+    let recorder = readyRecorder(argv.assets, slug)
+    let status = `${argv.assets}/plugins/datalog/schedules.json`
+    restart()
+
+    function start(slugitem,schedule) {
+      timers[slugitem] = recorder(schedule)
+      scheds[slugitem] = schedule
+      fs.writeFileSync(status, JSON.stringify(scheds))
+    }
+
+    function stop(slugitem) {
+      clearInterval(timers[slugitem])
+      delete timers[slugitem]
+      delete scheds[slugitem]
+      fs.writeFileSync(status, JSON.stringify(scheds))
+    }
+
+    function restart() {
+      let json = fs.readFileSync(status, 'utf8');
+      let scheds = JSON.parse(json)
+      let slugitems = Object.keys(scheds)
+      for (var i=0; i<slugitems.length; i++) {
+        let slugitem = slugitems[i]
+        let schedule = scheds[slugitems]
+        timers[slugitem] = recorder(schedule)
+      }
+    }
 
     app.get('/plugin/datalog/:slug/current', (req, res) => {
       return res.sendFile(logfile(Date.now()-minute))
@@ -104,16 +133,25 @@
       return res.sendFile(logfile(Date.now()-hour*req.params.offset))
     })
 
-    var status = 'inactive'
+
     app.post('/plugin/datalog/:slug/id/:id/', (req, res) => {
+      let slug = req.params['slug']
+      let item = req.params['id']
+      let slugitem = `${slug}/${item}`
       let command = req.body
-      console.log('command',command)
+      console.log('action',command.action||'status',slugitem)
       if (command.action) {
-        status = (command.action == 'start') ? 'active' : 'inactive'
+        if (command.action == 'start') {
+          start(slugitem, command.schedule)
+        } else if (command.action == 'stop') {
+          stop(slugitem)
+        }
       }
+      let status = timers[slugitem] ? 'active' : 'inactive'
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify({status}));
     })
+
   }
 
   module.exports = {startServer}

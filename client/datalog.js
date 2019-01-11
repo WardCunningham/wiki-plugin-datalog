@@ -33,7 +33,6 @@
       } else {
         line = `<font color=gray>${expand(line)}</font>`
       }
-      console.log(schedule)
       return line
     }).join('<br>')
     return {output, schedule}
