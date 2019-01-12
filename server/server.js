@@ -29,11 +29,11 @@
     return `${y}`
   }
 
-  function readyRecorder(assets,slug) {
 
-    var chunk
-    var keep
-    var sites
+  function startServer(params) {
+    var app = params.app,
+        argv = params.argv
+        assets = argv.assets
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -44,73 +44,69 @@
     mkdir(`${assets}`)
     mkdir(`${assets}/plugins`)
     mkdir(`${assets}/plugins/datalog`)
-    mkdir(`${assets}/plugins/datalog/${slug}`)
 
-    function logfile(clock) {
-      return `${assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
-    }
-
-    function timeout(duration) {
-      // https://stackoverflow.com/a/49857905
-      return new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`timeout after ${duration} msec`)), duration))
-    }
-
-    function sample(schedule) {
-      chunk = schedule.chunk||'year'
-      keep = schedule.keep||10
-      sites = schedule.sites||{}
-
-      let clock = Date.now()
-      queries = Object.keys(sites).map((name) =>
-        Promise.race([
-          fetch(sites[name]),
-          timeout(2000)
-        ])
-        .then(response => response.json())
-        .then(data => ({name, data}))
-        .catch(error => console.log(error)||{})
-      )
-      Promise.all(queries)
-        .then(result => save({clock,result}))
-    }
-
-    function save(result) {
-      let payload = JSON.stringify(result)
-      fs.appendFile(logfile(result.clock), `${payload}\n`)
-    }
-
-    function recorder(schedule) {
-      sample(schedule)
-      return setInterval(()=>sample(schedule),schedule.interval)
-    }
-
-    return recorder
-  }
-
-
-  function startServer(params) {
-    var app = params.app,
-        argv = params.argv
-
-    var slug = 'testing-datalog'
-
-    var minute = 60000,
-        hour = 60*minute,
-        day = 24*minute,
-        month = 30*day
-
-    function logfile(clock,chunk) {
+    function logfile(slug,clock,chunk) {
       return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
     }
 
-    let recorder = readyRecorder(argv.assets, slug)
-    let status = `${argv.assets}/plugins/datalog/schedules.json`
-    restart()
+    function activate(slugitem) {
+
+      console.log('activate', slugitem)
+      let schedule = scheds[slugitem]
+      let chunk = schedule.chunk||'year'
+      let keep = schedule.keep||10
+      let sites = schedule.sites||{}
+      let [slug, item] = slugitem.split('/')
+
+      mkdir(`${assets}/plugins/datalog/${slug}`)
+
+      // function logfile(clock) {
+      //   return `${assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
+      // }
+
+      function timeout(duration) {
+        // https://stackoverflow.com/a/49857905
+        return new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`timeout after ${duration} msec`)), duration))
+      }
+
+      function sample() {
+
+        let clock = Date.now()
+        queries = Object.keys(sites).map((name) =>
+          Promise.race([
+            fetch(sites[name]),
+            timeout(2000)
+          ])
+          .then(response => response.json())
+          .then(data => ({name, data}))
+          .catch(error => console.log(error)||{})
+        )
+        Promise.all(queries)
+          .then(result => save({clock,result}))
+      }
+
+      function save(result) {
+        let payload = JSON.stringify(result)
+        fs.appendFile(logfile(slug, result.clock, chunk), `${payload}\n`)
+      }
+
+      sample()
+      return setInterval(sample,schedule.interval)
+    }
+
+
+    let status = `${assets}/plugins/datalog/schedules.json`
+    let scheds = JSON.parse(fs.readFileSync(status, 'utf8'))
+    let slugitems = Object.keys(scheds)
+    for (var i=0; i<slugitems.length; i++) {
+      let slugitem = slugitems[i]
+      timers[slugitem] = activate(slugitem)
+    }
 
     function start(slugitem,schedule) {
-      timers[slugitem] = recorder(schedule)
       scheds[slugitem] = schedule
+      timers[slugitem] = activate(slugitem)
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
@@ -120,29 +116,6 @@
       delete scheds[slugitem]
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
-
-    function restart() {
-      let json = fs.readFileSync(status, 'utf8');
-      let scheds = JSON.parse(json)
-      let slugitems = Object.keys(scheds)
-      for (var i=0; i<slugitems.length; i++) {
-        let slugitem = slugitems[i]
-        let schedule = scheds[slugitems]
-        timers[slugitem] = recorder(schedule)
-      }
-    }
-
-    app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
-      return res.sendFile(logfile(Date.now()-(hour*req.params.offset),'hour'))
-    })
-
-    app.get('/plugin/datalog/:slug/day/:offset', (req, res) => {
-      return res.sendFile(logfile(Date.now()-(day*req.params.offset),'day'))
-    })
-
-    app.get('/plugin/datalog/:slug/month/:offset', (req, res) => {
-      return res.sendFile(logfile(Date.now()-(month*req.params.offset),'month'))
-    })
 
 
     app.post('/plugin/datalog/:slug/id/:id/', (req, res) => {
@@ -161,6 +134,23 @@
       let status = timers[slugitem] ? 'active' : 'inactive'
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify({status}));
+    })
+
+    var minute = 60000,
+        hour = 60*minute,
+        day = 24*minute,
+        month = 30*day
+
+    app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
+      return res.sendFile(logfile(req.params.slug,Date.now()-(hour*req.params.offset),'hour'))
+    })
+
+    app.get('/plugin/datalog/:slug/day/:offset', (req, res) => {
+      return res.sendFile(logfile(req.params.slug,Date.now()-(day*req.params.offset),'day'))
+    })
+
+    app.get('/plugin/datalog/:slug/month/:offset', (req, res) => {
+      return res.sendFile(logfile(req.params.slug,Date.now()-(month*req.params.offset),'month'))
     })
 
   }

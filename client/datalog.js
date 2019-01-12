@@ -54,9 +54,11 @@
 
     function action(command) {
       $button.prop('disabled',true)
+      $page = $item.parents('.page')
+      slug = $page.attr('id').split('_')[0]
       $.ajax({
         type: "POST",
-        url: `/plugin/datalog/${'test-datalog'}/id/${item.id}`,
+        url: `/plugin/datalog/${slug}/id/${item.id}`,
         data: JSON.stringify(command),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
