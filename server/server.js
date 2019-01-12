@@ -6,12 +6,6 @@
   const fs = require('fs')
   const fetch = require("node-fetch")
 
-  sensors = [
-    {name: 'desk', site: 'http://home.c2.com:8020'},
-    {name: 'office', site: 'http://home.c2.com:8021'},
-    {name: 'bedroom', site: 'http://home.c2.com:8022'}
-  ]
-
   scheds = {} // "slug/item" => schedule
   timers = {} // "slug/item" => timer
 
@@ -24,15 +18,22 @@
     return result.reverse().join('')
   }
 
-  function utc (date) {
+  function utc (date,chunk) {
     let y = decimal(date.getUTCFullYear(), 4)
     let m = decimal(date.getUTCMonth()+1, 2)
     let d = decimal(date.getUTCDate(), 2)
     let h = decimal(date.getUTCHours(), 2)
-    return `${y}-${m}-${d}-${h}`
+    if (chunk == 'hour') return `${y}-${m}-${d}-${h}`
+    if (chunk == 'day') return `${y}-${m}-${d}`
+    if (chunk == 'month') return `${y}-${m}`
+    return `${y}`
   }
 
   function readyRecorder(assets,slug) {
+
+    var chunk
+    var keep
+    var sites
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -46,7 +47,7 @@
     mkdir(`${assets}/plugins/datalog/${slug}`)
 
     function logfile(clock) {
-      return `${assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
+      return `${assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
     }
 
     function timeout(duration) {
@@ -55,15 +56,19 @@
         setTimeout(() => reject(new Error(`timeout after ${duration} msec`)), duration))
     }
 
-    function sample() {
+    function sample(schedule) {
+      chunk = schedule.chunk||'year'
+      keep = schedule.keep||10
+      sites = schedule.sites||{}
+
       let clock = Date.now()
-      queries = sensors.map((sensor) =>
+      queries = Object.keys(sites).map((name) =>
         Promise.race([
-          fetch(sensor.site),
+          fetch(sites[name]),
           timeout(2000)
         ])
         .then(response => response.json())
-        .then(json => ({name:sensor.name, data:json}))
+        .then(data => ({name, data}))
         .catch(error => console.log(error)||{})
       )
       Promise.all(queries)
@@ -75,8 +80,12 @@
       fs.appendFile(logfile(result.clock), `${payload}\n`)
     }
 
-    return (schedule) => setInterval(sample,5000)
+    function recorder(schedule) {
+      sample(schedule)
+      return setInterval(()=>sample(schedule),schedule.interval)
+    }
 
+    return recorder
   }
 
 
@@ -87,10 +96,12 @@
     var slug = 'testing-datalog'
 
     var minute = 60000,
-        hour = 60*minute
+        hour = 60*minute,
+        day = 24*minute,
+        month = 30*day
 
-    function logfile(clock) {
-      return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock))}.log`
+    function logfile(clock,chunk) {
+      return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
     }
 
     let recorder = readyRecorder(argv.assets, slug)
@@ -121,16 +132,16 @@
       }
     }
 
-    app.get('/plugin/datalog/:slug/current', (req, res) => {
-      return res.sendFile(logfile(Date.now()-minute))
+    app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
+      return res.sendFile(logfile(Date.now()-(hour*req.params.offset),'hour'))
     })
 
-    app.get('/plugin/datalog/:slug/previous', (req, res) => {
-      return res.sendFile(logfile(Date.now()-hour-minute))
+    app.get('/plugin/datalog/:slug/day/:offset', (req, res) => {
+      return res.sendFile(logfile(Date.now()-(day*req.params.offset),'day'))
     })
 
-    app.get('/plugin/datalog/:slug/offset/:offset', (req, res) => {
-      return res.sendFile(logfile(Date.now()-hour*req.params.offset))
+    app.get('/plugin/datalog/:slug/month/:offset', (req, res) => {
+      return res.sendFile(logfile(Date.now()-(month*req.params.offset),'month'))
     })
 
 

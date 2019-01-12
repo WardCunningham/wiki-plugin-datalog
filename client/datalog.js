@@ -13,18 +13,15 @@
     var schedule = {sites:{}, chunk:'hour', interval:5000, keep:24}
     let output = text.split(/\r?\n/).map (line => {
       var m
-      if (m = line.match(/^MINUTE (\d+)$/)) {
-        schedule.chunk = 'minute'
-        schedule.interval = 3600000 / m[1]
-      } else if (m = line.match(/^HOUR (\d+)$/)) {
+      if (m = line.match(/^HOUR (\d+)$/)) {
         schedule.chunk = 'hour'
-        schedule.interval = 3600000 / m[1]
+        schedule.interval = 1000*60*60 / m[1]
       } else if (m = line.match(/^DAY (\d+)$/)) {
         schedule.chunk = 'day'
-        schedule.interval = 3600000*24 / m[1]
-      } else if (m = line.match(/^WEEK (\d+)$/)) {
-        schedule.chunk = 'week'
-        schedule.interval = 3600000*24*7 / m[1]
+        schedule.interval = 1000*60*60*24 / m[1]
+      } else if (m = line.match(/^MONTH (\d+)$/)) {
+        schedule.chunk = 'month'
+        schedule.interval = 1000*60*60*24*30 / m[1]
       } else if (m = line.match(/^KEEP (\d+)$/)) {
         schedule.keep = m[1]*1
       } else if (m = line.match(/^SENSOR (\w+) (https?:\S+)$/)) {
