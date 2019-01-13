@@ -58,7 +58,8 @@
       let chunk = schedule.chunk||'year'
       let keep = schedule.keep||10
       let sites = schedule.sites||{}
-      let [slug, item] = slugitem.split('/')
+      let slug = slugitem.split('/')[0]
+      let item = slugitem.split('/')[1]
 
       mkdir(`${assets}/plugins/datalog/${slug}`)
 
