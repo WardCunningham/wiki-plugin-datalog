@@ -1,13 +1,15 @@
 // datalog plugin, server-side component
 // These handlers are launched with the wiki server.
 
+"use strict";
+
 (function() {
 
   const fs = require('fs')
   const fetch = require("node-fetch")
 
-  scheds = {} // "slug/item" => schedule
-  timers = {} // "slug/item" => timer
+  var scheds = {} // "slug/item" => schedule
+  var timers = {} // "slug/item" => timer
 
   function decimal(number, digits) {
     var result = []
@@ -32,7 +34,7 @@
 
   function startServer(params) {
     var app = params.app,
-        argv = params.argv
+        argv = params.argv,
         assets = argv.assets
 
     function mkdir(dir) {
@@ -73,7 +75,7 @@
       function sample() {
 
         let clock = Date.now()
-        queries = Object.keys(sites).map((name) =>
+        let queries = Object.keys(sites).map((name) =>
           Promise.race([
             fetch(sites[name]),
             timeout(2000)
