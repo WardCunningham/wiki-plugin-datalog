@@ -100,12 +100,14 @@
 
 
     let status = `${assets}/plugins/datalog/schedules.json`
-    let scheds = JSON.parse(fs.readFileSync(status, 'utf8'))
-    let slugitems = Object.keys(scheds)
-    for (var i=0; i<slugitems.length; i++) {
-      let slugitem = slugitems[i]
-      timers[slugitem] = activate(slugitem)
-    }
+    try {
+      scheds = JSON.parse(fs.readFileSync(status, 'utf8'))
+      let slugitems = Object.keys(scheds)
+      for (var i=0; i<slugitems.length; i++) {
+        let slugitem = slugitems[i]
+        timers[slugitem] = activate(slugitem)
+      }
+    } catch (err) { }
 
     function start(slugitem,schedule) {
       scheds[slugitem] = schedule
