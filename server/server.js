@@ -143,7 +143,7 @@
 
     var minute = 60000,
         hour = 60*minute,
-        day = 24*minute,
+        day = 24*hour,
         month = 30*day
 
     app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
@@ -156,6 +156,24 @@
 
     app.get('/plugin/datalog/:slug/month/:offset', (req, res) => {
       return res.sendFile(logfile(req.params.slug,Date.now()-(month*req.params.offset),'month'))
+    })
+
+    app.get('/plugin/datalog/random', (req, res) => {
+      let tries = [1,2,3,4,5,6]
+      let sample = {
+        uniform: Math.random(),
+        gaussian: tries.reduce((sum,_)=>sum+=Math.random())/tries.length
+      }
+      res.send(JSON.stringify(sample))
+    })
+
+    app.get('/plugin/datalog/waves', (req, res) => {
+      let angle=Date.now()/(3*60*1000)*2*Math.PI
+      let sample = {
+        sin: Math.sin(angle),
+        cos: Math.cos(angle)
+      }
+      res.send(JSON.stringify(sample))
     })
 
   }

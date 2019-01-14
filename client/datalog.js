@@ -9,6 +9,11 @@
       .replace(/\*(.+?)\*/g, '<i>$1</i>')
   };
 
+  function absolute(url) {
+    // https://github.com/bitinn/node-fetch/issues/481
+    return url.replace(/^(https?:)\/([^\/])/,`$1//${location.host}/$2`)
+  }
+
   function parse(text) {
     var schedule = {sites:{}, chunk:'hour', interval:5000, keep:24}
     let output = text.split(/\r?\n/).map (line => {
@@ -25,8 +30,8 @@
       } else if (m = line.match(/^KEEP (\d+)$/)) {
         schedule.keep = m[1]*1
       } else if (m = line.match(/^SENSOR (\w+) (https?:\S+)$/)) {
-        schedule.sites[m[1]] = m[2]
-        line = `SENSOR <a href="${m[2]}" target=_blank>${m[1]} <img src="/images/external-link-ltr-icon.png"></a>`
+        schedule.sites[m[1]] = absolute(m[2])
+        line = `SENSOR <a href="${absolute(m[2])}" target=_blank>${m[1]} <img src="/images/external-link-ltr-icon.png"></a>`
       } else {
         line = `<font color=gray>${expand(line)}</font>`
       }
