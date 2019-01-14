@@ -1,0 +1,313 @@
+{
+  "title": "More About Managing Datalogs",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "e3e73aef74a8d13c",
+      "text": "Both site owners and server administrators should be concerned about automatic resource consumption left unchecked. We suggest how one might check up on logging past and present."
+    },
+    {
+      "type": "markdown",
+      "id": "021db4ab13e5a3ac",
+      "text": "# Owners"
+    },
+    {
+      "type": "paragraph",
+      "id": "48dad1bd3d34dcaf",
+      "text": "Stop Datalogs when not in use."
+    },
+    {
+      "type": "paragraph",
+      "id": "7f17f60e71afe9d0",
+      "text": "Find Datalogs that might have been forgotten."
+    },
+    {
+      "type": "grep",
+      "id": "c5461b09e73aaa85",
+      "text": "ITEM datalog"
+    },
+    {
+      "type": "markdown",
+      "id": "78a0afb147cc569c",
+      "text": "# Administrators"
+    },
+    {
+      "type": "paragraph",
+      "id": "1d4a44e8db89d546",
+      "text": "Find space used by logs."
+    },
+    {
+      "type": "code",
+      "id": "84a11f90c2eb0a8e",
+      "text": "(cd ~/.wiki; du -h */assets/plugins/datalog/*)"
+    },
+    {
+      "type": "paragraph",
+      "id": "71c3e8e1797162f6",
+      "text": "Find timer intervals used by plugin."
+    },
+    {
+      "type": "code",
+      "id": "3aff041620ec6f07",
+      "text": "find ~/.wiki -name 'schedules.json' | \\\n  while read s\n    do echo $s\n    jq '.[].interval' $s\n  done"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "More About Managing Datalogs",
+        "story": []
+      },
+      "date": 1547431974378
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "e3e73aef74a8d13c"
+      },
+      "id": "e3e73aef74a8d13c",
+      "type": "add",
+      "date": 1547432445981
+    },
+    {
+      "type": "edit",
+      "id": "e3e73aef74a8d13c",
+      "item": {
+        "type": "paragraph",
+        "id": "e3e73aef74a8d13c",
+        "text": "Both site owners and server operators should be concerned about automatic resource consumption left unchecked. We suggest how one might check up on logging past and present."
+      },
+      "date": 1547432579917
+    },
+    {
+      "type": "add",
+      "id": "021db4ab13e5a3ac",
+      "item": {
+        "type": "paragraph",
+        "id": "021db4ab13e5a3ac",
+        "text": "# Owners"
+      },
+      "after": "e3e73aef74a8d13c",
+      "date": 1547432681818
+    },
+    {
+      "type": "add",
+      "id": "48dad1bd3d34dcaf",
+      "item": {
+        "type": "paragraph",
+        "id": "48dad1bd3d34dcaf",
+        "text": "Stop Datalogs when not in use."
+      },
+      "after": "021db4ab13e5a3ac",
+      "date": 1547432716835
+    },
+    {
+      "type": "add",
+      "id": "7f17f60e71afe9d0",
+      "item": {
+        "type": "paragraph",
+        "id": "7f17f60e71afe9d0",
+        "text": "Find Datalogs that might have been forgotten."
+      },
+      "after": "48dad1bd3d34dcaf",
+      "date": 1547432743386
+    },
+    {
+      "type": "edit",
+      "id": "021db4ab13e5a3ac",
+      "item": {
+        "type": "markdown",
+        "id": "021db4ab13e5a3ac",
+        "text": "# Owners"
+      },
+      "date": 1547432747717
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c5461b09e73aaa85"
+      },
+      "id": "c5461b09e73aaa85",
+      "type": "add",
+      "after": "7f17f60e71afe9d0",
+      "date": 1547432750154
+    },
+    {
+      "type": "edit",
+      "id": "c5461b09e73aaa85",
+      "item": {
+        "type": "grep",
+        "id": "c5461b09e73aaa85",
+        "text": "ITEMS datalog"
+      },
+      "date": 1547432765578
+    },
+    {
+      "type": "edit",
+      "id": "c5461b09e73aaa85",
+      "item": {
+        "type": "grep",
+        "id": "c5461b09e73aaa85",
+        "text": "ITEM datalog"
+      },
+      "date": 1547432772994
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "78a0afb147cc569c"
+      },
+      "id": "78a0afb147cc569c",
+      "type": "add",
+      "after": "c5461b09e73aaa85",
+      "date": 1547432854629
+    },
+    {
+      "type": "edit",
+      "id": "78a0afb147cc569c",
+      "item": {
+        "type": "paragraph",
+        "id": "78a0afb147cc569c",
+        "text": "# Administrators"
+      },
+      "date": 1547432888911
+    },
+    {
+      "type": "edit",
+      "id": "e3e73aef74a8d13c",
+      "item": {
+        "type": "paragraph",
+        "id": "e3e73aef74a8d13c",
+        "text": "Both site owners and server administrators should be concerned about automatic resource consumption left unchecked. We suggest how one might check up on logging past and present."
+      },
+      "date": 1547432902047
+    },
+    {
+      "type": "add",
+      "id": "1d4a44e8db89d546",
+      "item": {
+        "type": "paragraph",
+        "id": "1d4a44e8db89d546",
+        "text": "Find space used by logs."
+      },
+      "after": "78a0afb147cc569c",
+      "date": 1547432941175
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "84a11f90c2eb0a8e"
+      },
+      "id": "84a11f90c2eb0a8e",
+      "type": "add",
+      "after": "1d4a44e8db89d546",
+      "date": 1547432962579
+    },
+    {
+      "type": "edit",
+      "id": "84a11f90c2eb0a8e",
+      "item": {
+        "type": "code",
+        "id": "84a11f90c2eb0a8e",
+        "text": "(cd ~/.wiki; du -h */assets/plugins/datalog/*)"
+      },
+      "date": 1547432969929
+    },
+    {
+      "type": "edit",
+      "id": "78a0afb147cc569c",
+      "item": {
+        "type": "markdown",
+        "id": "78a0afb147cc569c",
+        "text": "# Administrators"
+      },
+      "date": 1547432985820
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "71c3e8e1797162f6"
+      },
+      "id": "71c3e8e1797162f6",
+      "type": "add",
+      "after": "84a11f90c2eb0a8e",
+      "date": 1547433643069
+    },
+    {
+      "type": "edit",
+      "id": "71c3e8e1797162f6",
+      "item": {
+        "type": "paragraph",
+        "id": "71c3e8e1797162f6",
+        "text": "Find timer intervals used by logs."
+      },
+      "date": 1547433679484
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "604973445a2f0a83"
+      },
+      "id": "604973445a2f0a83",
+      "type": "add",
+      "after": "71c3e8e1797162f6",
+      "date": 1547433683479
+    },
+    {
+      "type": "edit",
+      "id": "604973445a2f0a83",
+      "item": {
+        "type": "code",
+        "id": "604973445a2f0a83",
+        "text": "find ~/.wiki -name 'schedules.json' | \\\n while read s; do echo $s; jq '.[].interval' $s; done"
+      },
+      "date": 1547433718630
+    },
+    {
+      "type": "edit",
+      "id": "604973445a2f0a83",
+      "item": {
+        "type": "code",
+        "id": "604973445a2f0a83",
+        "text": "find ~/.wiki -name 'schedules.json' | \\\n while read s; do echo $s\n jq '.[].interval' $s; done"
+      },
+      "date": 1547433743236
+    },
+    {
+      "type": "remove",
+      "id": "604973445a2f0a83",
+      "date": 1547433773370
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "3aff041620ec6f07"
+      },
+      "id": "3aff041620ec6f07",
+      "type": "add",
+      "after": "71c3e8e1797162f6",
+      "date": 1547433776036
+    },
+    {
+      "type": "edit",
+      "id": "3aff041620ec6f07",
+      "item": {
+        "type": "code",
+        "id": "3aff041620ec6f07",
+        "text": "find ~/.wiki -name 'schedules.json' | \\\n  while read s\n    do echo $s\n    jq '.[].interval' $s\n  done"
+      },
+      "date": 1547433813363
+    },
+    {
+      "type": "edit",
+      "id": "71c3e8e1797162f6",
+      "item": {
+        "type": "paragraph",
+        "id": "71c3e8e1797162f6",
+        "text": "Find timer intervals used by plugin."
+      },
+      "date": 1547433902057
+    }
+  ]
+}

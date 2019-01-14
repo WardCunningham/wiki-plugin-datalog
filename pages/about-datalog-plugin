@@ -1,37 +1,439 @@
 {
   "title": "About Datalog Plugin",
   "story": [
-  {
-    "type": "paragraph",
-    "id": "32bfe69985391c1f",
-    "text": "Here we describe the purpose of the plugin and include a sample."
-  },
-  {
-    "type": "datalog",
-    "id": "3f9679d65fe2499c",
-    "text": "This is text in the new plugin. You can *double-click* to edit it too."
-  }
-],
-  "journal": [
-  {
-    "type": "create",
-    "item": {
-      "title": "About Datalog Plugin",
-      "story": [
-  {
-    "type": "paragraph",
-    "id": "32bfe69985391c1f",
-    "text": "Here we describe the purpose of the plugin and include a sample."
-  },
-  {
-    "type": "datalog",
-    "id": "3f9679d65fe2499c",
-    "text": "This is text in the new plugin. You can *double-click* to edit it too."
-  }
-]
+    {
+      "type": "paragraph",
+      "id": "32bfe69985391c1f",
+      "text": "This plugin queries data from one or more sensors following a schedule specified by markup. Results accumulate in asset files rolled and eventually discarded over time."
     },
-    "date": 1546799562000,
-    "certificate": "from mkplugin.sh"
-  }
-]
+    {
+      "type": "datalog",
+      "id": "3f9679d65fe2499c",
+      "text": "Record data from sources provided by the plugin.\n\nSENSOR random http:/plugin/datalog/random\nSENSOR waves http:/plugin/datalog/waves\nHOUR 600\nKEEP 3"
+    },
+    {
+      "type": "paragraph",
+      "id": "8e4276e18adc1a23",
+      "text": "A single button offers to start or stop recording. The button will show 'wait' while connecting to the plugin's server-side component."
+    },
+    {
+      "type": "markdown",
+      "id": "3641f56bb0731bec",
+      "text": "# Markup"
+    },
+    {
+      "type": "markdown",
+      "id": "9b24e267bbd7e0c6",
+      "text": "Say __SENSOR__ _name_ _url_ to query from this source.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "e546948f313df9cc",
+      "text": "\n"
+    },
+    {
+      "type": "markdown",
+      "id": "134e6adb485215bb",
+      "text": "Say __HOUR__ _count_ for hourly files of count samples.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "ce9e743770d29487",
+      "text": "Say __DAY__ _count_ for daily files of count samples.\n"
+    },
+    {
+      "type": "markdown",
+      "id": "3476d91db788fb81",
+      "text": "Say __MONTH__ _count_ for monthly files of count samples.\n\n"
+    },
+    {
+      "type": "markdown",
+      "id": "6be3ac01af69a190",
+      "text": "Say __KEEP__ _count_ to retain count sample files."
+    },
+    {
+      "type": "paragraph",
+      "id": "088806b434dea784",
+      "text": "Remaining lines are rendered as comments."
+    },
+    {
+      "type": "paragraph",
+      "id": "b9e3b3fb95b6912a",
+      "text": "See [[More About Datalog Assets]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "37900b49a95400cc",
+      "text": "See [[More About Managing Datalogs]]"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "About Datalog Plugin",
+        "story": [
+          {
+            "type": "paragraph",
+            "id": "32bfe69985391c1f",
+            "text": "Here we describe the purpose of the plugin and include a sample."
+          },
+          {
+            "type": "datalog",
+            "id": "3f9679d65fe2499c",
+            "text": "This is text in the new plugin. You can *double-click* to edit it too."
+          }
+        ]
+      },
+      "date": 1546799562000,
+      "certificate": "from mkplugin.sh"
+    },
+    {
+      "type": "edit",
+      "id": "32bfe69985391c1f",
+      "item": {
+        "type": "paragraph",
+        "id": "32bfe69985391c1f",
+        "text": "This plugin queries data from one or more sensors following a schedule specified by markup. Results accumulate in asset files rolled and eventually discarded over time."
+      },
+      "date": 1547422833809
+    },
+    {
+      "type": "edit",
+      "id": "3f9679d65fe2499c",
+      "item": {
+        "type": "datalog",
+        "id": "3f9679d65fe2499c",
+        "text": "SENSOR random http:/plugin/datalog/random\nSENSOR waves http:/plugin/datalog/waves\nHOUR 600\nKEEP 3"
+      },
+      "date": 1547422895270
+    },
+    {
+      "type": "edit",
+      "id": "3f9679d65fe2499c",
+      "item": {
+        "type": "datalog",
+        "id": "3f9679d65fe2499c",
+        "text": "Sample sources provided by the plugin.\n\nSENSOR random http:/plugin/datalog/random\nSENSOR waves http:/plugin/datalog/waves\nHOUR 600\nKEEP 3"
+      },
+      "date": 1547422944029
+    },
+    {
+      "type": "edit",
+      "id": "3f9679d65fe2499c",
+      "item": {
+        "type": "datalog",
+        "id": "3f9679d65fe2499c",
+        "text": "Record data from sample sources provided by the plugin.\n\nSENSOR random http:/plugin/datalog/random\nSENSOR waves http:/plugin/datalog/waves\nHOUR 600\nKEEP 3"
+      },
+      "date": 1547422963357
+    },
+    {
+      "type": "edit",
+      "id": "3f9679d65fe2499c",
+      "item": {
+        "type": "datalog",
+        "id": "3f9679d65fe2499c",
+        "text": "Record data from sources provided by the plugin.\n\nSENSOR random http:/plugin/datalog/random\nSENSOR waves http:/plugin/datalog/waves\nHOUR 600\nKEEP 3"
+      },
+      "date": 1547422970876
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "8e4276e18adc1a23"
+      },
+      "id": "8e4276e18adc1a23",
+      "type": "add",
+      "after": "3f9679d65fe2499c",
+      "date": 1547423077086
+    },
+    {
+      "type": "edit",
+      "id": "8e4276e18adc1a23",
+      "item": {
+        "type": "paragraph",
+        "id": "8e4276e18adc1a23",
+        "text": "A single button offers to start or stop recording. The button will show wait while connecting to the plugin's server-side component."
+      },
+      "date": 1547423177904
+    },
+    {
+      "type": "edit",
+      "id": "8e4276e18adc1a23",
+      "item": {
+        "type": "paragraph",
+        "id": "8e4276e18adc1a23",
+        "text": "A single button offers to start or stop recording. The button will show 'wait' while connecting to the plugin's server-side component."
+      },
+      "date": 1547423194143
+    },
+    {
+      "type": "add",
+      "id": "3641f56bb0731bec",
+      "item": {
+        "type": "factory",
+        "id": "3641f56bb0731bec",
+        "text": "# Mark"
+      },
+      "after": "8e4276e18adc1a23",
+      "date": 1547423206846
+    },
+    {
+      "type": "edit",
+      "id": "3641f56bb0731bec",
+      "item": {
+        "type": "markdown",
+        "id": "3641f56bb0731bec",
+        "text": "# Markup"
+      },
+      "date": 1547423214897
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "9b24e267bbd7e0c6"
+      },
+      "id": "9b24e267bbd7e0c6",
+      "type": "add",
+      "after": "3641f56bb0731bec",
+      "date": 1547423218047
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "paragraph",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say SENSOR name url"
+      },
+      "date": 1547423264190
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "markdown",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say _SENSOR_ __name__ __url__ to query json data from this source."
+      },
+      "date": 1547423565956
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "markdown",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say __SENSOR__ _name_ _url_ to query json data from this source."
+      },
+      "date": 1547423591242
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "markdown",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say __SENSOR__ _name_ _url_ to query jfrom this source."
+      },
+      "date": 1547423601251
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "markdown",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say __SENSOR__ _name_ _url_ to query from this source."
+      },
+      "date": 1547423606947
+    },
+    {
+      "type": "edit",
+      "id": "9b24e267bbd7e0c6",
+      "item": {
+        "type": "markdown",
+        "id": "9b24e267bbd7e0c6",
+        "text": "Say __SENSOR__ _name_ _url_ to query from this source.\n"
+      },
+      "date": 1547423611754
+    },
+    {
+      "type": "add",
+      "id": "e546948f313df9cc",
+      "item": {
+        "type": "markdown",
+        "id": "e546948f313df9cc",
+        "text": "Say __HOUR__ _samples_ for hourly files with that many samples."
+      },
+      "after": "9b24e267bbd7e0c6",
+      "date": 1547423723352
+    },
+    {
+      "type": "edit",
+      "id": "e546948f313df9cc",
+      "item": {
+        "type": "markdown",
+        "id": "e546948f313df9cc",
+        "text": "Say __HOUR__ _count_ for hourly files of count samples."
+      },
+      "date": 1547423797278
+    },
+    {
+      "type": "edit",
+      "id": "e546948f313df9cc",
+      "item": {
+        "type": "markdown",
+        "id": "e546948f313df9cc",
+        "text": "\n"
+      },
+      "date": 1547423807374
+    },
+    {
+      "type": "add",
+      "id": "134e6adb485215bb",
+      "item": {
+        "type": "markdown",
+        "id": "134e6adb485215bb",
+        "text": "Say __HOUR__ _count_ for hourly files of count samples.\n"
+      },
+      "after": "e546948f313df9cc",
+      "date": 1547423815838
+    },
+    {
+      "type": "add",
+      "id": "ce9e743770d29487",
+      "item": {
+        "type": "markdown",
+        "id": "ce9e743770d29487",
+        "text": "Say __DAY__ _count_ for daily files of count samples."
+      },
+      "after": "134e6adb485215bb",
+      "date": 1547423834094
+    },
+    {
+      "type": "edit",
+      "id": "ce9e743770d29487",
+      "item": {
+        "type": "markdown",
+        "id": "ce9e743770d29487",
+        "text": "Say __DAY__ _count_ for daily files of count samples.\n"
+      },
+      "date": 1547423863623
+    },
+    {
+      "type": "add",
+      "id": "3476d91db788fb81",
+      "item": {
+        "type": "markdown",
+        "id": "3476d91db788fb81",
+        "text": "Say __MONTH__ _count_ for monthly files of count samples."
+      },
+      "after": "ce9e743770d29487",
+      "date": 1547423880638
+    },
+    {
+      "type": "edit",
+      "id": "3476d91db788fb81",
+      "item": {
+        "type": "markdown",
+        "id": "3476d91db788fb81",
+        "text": "Say __MONTH__ _count_ for monthly files of count samples.\n"
+      },
+      "date": 1547423895197
+    },
+    {
+      "type": "edit",
+      "id": "3476d91db788fb81",
+      "item": {
+        "type": "markdown",
+        "id": "3476d91db788fb81",
+        "text": "Say __MONTH__ _count_ for monthly files of count samples.\n\n"
+      },
+      "date": 1547423900214
+    },
+    {
+      "type": "add",
+      "id": "6be3ac01af69a190",
+      "item": {
+        "type": "markdown",
+        "id": "6be3ac01af69a190",
+        "text": "Say __KEEP__ _count_ to retain count sample files."
+      },
+      "after": "3476d91db788fb81",
+      "date": 1547423952878
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "088806b434dea784"
+      },
+      "id": "088806b434dea784",
+      "type": "add",
+      "after": "6be3ac01af69a190",
+      "date": 1547428292163
+    },
+    {
+      "type": "edit",
+      "id": "088806b434dea784",
+      "item": {
+        "type": "paragraph",
+        "id": "088806b434dea784",
+        "text": "Remaining lines are rendered as comments."
+      },
+      "date": 1547428347107
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b9e3b3fb95b6912a"
+      },
+      "id": "b9e3b3fb95b6912a",
+      "type": "add",
+      "after": "088806b434dea784",
+      "date": 1547429406332
+    },
+    {
+      "type": "edit",
+      "id": "b9e3b3fb95b6912a",
+      "item": {
+        "type": "paragraph",
+        "id": "b9e3b3fb95b6912a",
+        "text": "See [[More About Datalog Assets]]"
+      },
+      "date": 1547429424477
+    },
+    {
+      "type": "add",
+      "id": "37900b49a95400cc",
+      "item": {
+        "type": "paragraph",
+        "id": "37900b49a95400cc",
+        "text": "See More About Managing Datalogs"
+      },
+      "after": "b9e3b3fb95b6912a",
+      "date": 1547429443443
+    },
+    {
+      "type": "edit",
+      "id": "37900b49a95400cc",
+      "item": {
+        "type": "paragraph",
+        "id": "37900b49a95400cc",
+        "text": "See [[More About Managing Datalog]]s"
+      },
+      "date": 1547429459188
+    },
+    {
+      "type": "edit",
+      "id": "37900b49a95400cc",
+      "item": {
+        "type": "paragraph",
+        "id": "37900b49a95400cc",
+        "text": "See [[More About Managing Datalogs]]"
+      },
+      "date": 1547429467898
+    }
+  ]
 }

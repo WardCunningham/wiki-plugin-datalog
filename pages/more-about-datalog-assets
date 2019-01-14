@@ -1,0 +1,436 @@
+{
+  "title": "More About Datalog Assets",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "b5a3d796fc6eb1d4",
+      "text": "The Datalog plugin stores data as files in several asset subdirectories. One contains status information for all logging in the site. Others contain the records for a specific page."
+    },
+    {
+      "type": "markdown",
+      "id": "90000ee851cdd215",
+      "text": "# plugins/datalog"
+    },
+    {
+      "type": "paragraph",
+      "id": "bfa1097a3b9d1630",
+      "text": "The plugin reserves this directory for state information in json files. The schedules.json file contains parsed form of markup for presently running logs."
+    },
+    {
+      "type": "assets",
+      "id": "d10abe7301603529",
+      "text": "plugins/datalog"
+    },
+    {
+      "type": "markdown",
+      "id": "204e511caca1dd4f",
+      "text": "# plugins/datalog/*"
+    },
+    {
+      "type": "paragraph",
+      "id": "af3e2d2bd08f8875",
+      "text": "The plugin records logs in subdirectories named by the slug of the page title where Datalogs have been run. For example, here are the logs started from the About Datalog Plugin page."
+    },
+    {
+      "type": "assets",
+      "id": "836c726ee81e0cbf",
+      "text": "plugins/datalog/about-datalog-plugin"
+    },
+    {
+      "type": "markdown",
+      "id": "c951931354c69011",
+      "text": "# API"
+    },
+    {
+      "type": "paragraph",
+      "id": "a0a3d5c55fb449ea",
+      "text": "Programs can retrieve schedules.json and specific logs via the asset GET routes for the site."
+    },
+    {
+      "type": "code",
+      "id": "2618a906f6c06884",
+      "text": "/assets/plugins/datalog/schedules.json\n/assets/plugins/datalog/<slug>/<file>"
+    },
+    {
+      "type": "paragraph",
+      "id": "aad15e2c75f1697f",
+      "text": "A program can retrieve a log file addressed by an offset from the most recent file. Offset zero is the file currently being written. Chunk is one of 'hour', 'day' or 'year' depending on the file naming in use."
+    },
+    {
+      "type": "code",
+      "id": "47ea9311261eab5c",
+      "text": "/plugin/datalog/<slug>/<chunk>/offset/<number>"
+    },
+    {
+      "type": "paragraph",
+      "id": "1aaa1aa66d159030",
+      "text": "Several routes provide properly formatted sample data useful for documentation and testing. "
+    },
+    {
+      "type": "code",
+      "id": "a3cabf3cf4a4fac0",
+      "text": "/plugin/datalog/random\n/plugin/datalog/waves"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "More About Datalog Assets",
+        "story": []
+      },
+      "date": 1547429489623
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "b5a3d796fc6eb1d4"
+      },
+      "id": "b5a3d796fc6eb1d4",
+      "type": "add",
+      "date": 1547429492102
+    },
+    {
+      "type": "edit",
+      "id": "b5a3d796fc6eb1d4",
+      "item": {
+        "type": "paragraph",
+        "id": "b5a3d796fc6eb1d4",
+        "text": "The Datalog plugin stores data as files in several asset subdirectories. One contains status information for all logging in the site. Others contain the records for a specific page."
+      },
+      "date": 1547429697456
+    },
+    {
+      "type": "add",
+      "id": "90000ee851cdd215",
+      "item": {
+        "type": "paragraph",
+        "id": "90000ee851cdd215",
+        "text": "# plugins/datalog"
+      },
+      "after": "b5a3d796fc6eb1d4",
+      "date": 1547429740191
+    },
+    {
+      "type": "edit",
+      "id": "90000ee851cdd215",
+      "item": {
+        "type": "markdown",
+        "id": "90000ee851cdd215",
+        "text": "# plugins/datalog"
+      },
+      "date": 1547429744747
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d10abe7301603529"
+      },
+      "id": "d10abe7301603529",
+      "type": "add",
+      "after": "90000ee851cdd215",
+      "date": 1547429753714
+    },
+    {
+      "type": "edit",
+      "id": "d10abe7301603529",
+      "item": {
+        "type": "assets",
+        "id": "d10abe7301603529",
+        "text": "plugins/datalog"
+      },
+      "date": 1547429768938
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "bfa1097a3b9d1630"
+      },
+      "id": "bfa1097a3b9d1630",
+      "type": "add",
+      "after": "d10abe7301603529",
+      "date": 1547429785256
+    },
+    {
+      "type": "edit",
+      "id": "bfa1097a3b9d1630",
+      "item": {
+        "type": "paragraph",
+        "id": "bfa1097a3b9d1630",
+        "text": "The plugin reserves this directory for state information in json files. The schedules.json file contains parsed form of markup for presently running logs."
+      },
+      "date": 1547430123865
+    },
+    {
+      "type": "move",
+      "order": [
+        "b5a3d796fc6eb1d4",
+        "90000ee851cdd215",
+        "bfa1097a3b9d1630",
+        "d10abe7301603529"
+      ],
+      "id": "bfa1097a3b9d1630",
+      "date": 1547430129967
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "204e511caca1dd4f"
+      },
+      "id": "204e511caca1dd4f",
+      "type": "add",
+      "after": "d10abe7301603529",
+      "date": 1547430162825
+    },
+    {
+      "type": "edit",
+      "id": "204e511caca1dd4f",
+      "item": {
+        "type": "factory",
+        "id": "204e511caca1dd4f",
+        "text": "plugins"
+      },
+      "date": 1547430188350
+    },
+    {
+      "type": "edit",
+      "id": "204e511caca1dd4f",
+      "item": {
+        "type": "markdown",
+        "id": "204e511caca1dd4f",
+        "text": "# plugins/datalog/*"
+      },
+      "date": 1547430213656
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "af3e2d2bd08f8875"
+      },
+      "id": "af3e2d2bd08f8875",
+      "type": "add",
+      "after": "204e511caca1dd4f",
+      "date": 1547430216789
+    },
+    {
+      "type": "edit",
+      "id": "af3e2d2bd08f8875",
+      "item": {
+        "type": "paragraph",
+        "id": "af3e2d2bd08f8875",
+        "text": "The plugin records logs in subdirectories named by the slug of the page title where Datalogs have been run. For example, here are the logs started from the About Datalog Plugin page."
+      },
+      "date": 1547430514315
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "836c726ee81e0cbf"
+      },
+      "id": "836c726ee81e0cbf",
+      "type": "add",
+      "after": "af3e2d2bd08f8875",
+      "date": 1547430519355
+    },
+    {
+      "type": "edit",
+      "id": "836c726ee81e0cbf",
+      "item": {
+        "type": "assets",
+        "id": "836c726ee81e0cbf",
+        "text": "plugins/datalog/about-datalog-plugin"
+      },
+      "date": 1547430542782
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "c951931354c69011"
+      },
+      "id": "c951931354c69011",
+      "type": "add",
+      "after": "836c726ee81e0cbf",
+      "date": 1547430647142
+    },
+    {
+      "type": "edit",
+      "id": "c951931354c69011",
+      "item": {
+        "type": "markdown",
+        "id": "c951931354c69011",
+        "text": "# API"
+      },
+      "date": 1547430664004
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a0a3d5c55fb449ea"
+      },
+      "id": "a0a3d5c55fb449ea",
+      "type": "add",
+      "after": "c951931354c69011",
+      "date": 1547430681852
+    },
+    {
+      "type": "edit",
+      "id": "a0a3d5c55fb449ea",
+      "item": {
+        "type": "paragraph",
+        "id": "a0a3d5c55fb449ea",
+        "text": "Programs can retrieve schedules.json and specific logs via the asset GET routes."
+      },
+      "date": 1547430860719
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "2618a906f6c06884"
+      },
+      "id": "2618a906f6c06884",
+      "type": "add",
+      "after": "a0a3d5c55fb449ea",
+      "date": 1547430924552
+    },
+    {
+      "type": "edit",
+      "id": "2618a906f6c06884",
+      "item": {
+        "type": "code",
+        "id": "2618a906f6c06884",
+        "text": "/assets/plugins/datalog/schedules.json\n/assets/plugins/datalog/about-datalog-plugin/2019-01-14-01.log"
+      },
+      "date": 1547431165408
+    },
+    {
+      "type": "edit",
+      "id": "2618a906f6c06884",
+      "item": {
+        "type": "code",
+        "id": "2618a906f6c06884",
+        "text": "/assets/plugins/datalog/schedules.json\n/assets/plugins/datalog/<slug>/<file>"
+      },
+      "date": 1547431218325
+    },
+    {
+      "type": "edit",
+      "id": "a0a3d5c55fb449ea",
+      "item": {
+        "type": "paragraph",
+        "id": "a0a3d5c55fb449ea",
+        "text": "Programs can retrieve schedules.json and specific logs via the asset GET routes for the site."
+      },
+      "date": 1547431250752
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "aad15e2c75f1697f"
+      },
+      "id": "aad15e2c75f1697f",
+      "type": "add",
+      "after": "2618a906f6c06884",
+      "date": 1547431285679
+    },
+    {
+      "type": "edit",
+      "id": "aad15e2c75f1697f",
+      "item": {
+        "type": "paragraph",
+        "id": "aad15e2c75f1697f",
+        "text": "A program can retrieve a log file addressed by an offset from the most recent file. Offset zero is the file currently being written."
+      },
+      "date": 1547431381318
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "47ea9311261eab5c"
+      },
+      "id": "47ea9311261eab5c",
+      "type": "add",
+      "after": "aad15e2c75f1697f",
+      "date": 1547431383481
+    },
+    {
+      "type": "edit",
+      "id": "47ea9311261eab5c",
+      "item": {
+        "type": "code",
+        "id": "47ea9311261eab5c",
+        "text": "/plugin/datalog/<slug>/offset/<number>"
+      },
+      "date": 1547431443490
+    },
+    {
+      "type": "edit",
+      "id": "47ea9311261eab5c",
+      "item": {
+        "type": "code",
+        "id": "47ea9311261eab5c",
+        "text": "/plugin/datalog/<slug>/<chunk>/offset/<number>"
+      },
+      "date": 1547431545621
+    },
+    {
+      "type": "edit",
+      "id": "aad15e2c75f1697f",
+      "item": {
+        "type": "paragraph",
+        "id": "aad15e2c75f1697f",
+        "text": "A program can retrieve a log file addressed by an offset from the most recent file. Offset zero is the file currently being written. Chunk is one of 'hour', 'day' or 'year' depending on the file naming in use."
+      },
+      "date": 1547431653225
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "1aaa1aa66d159030"
+      },
+      "id": "1aaa1aa66d159030",
+      "type": "add",
+      "after": "47ea9311261eab5c",
+      "date": 1547431796082
+    },
+    {
+      "type": "edit",
+      "id": "1aaa1aa66d159030",
+      "item": {
+        "type": "paragraph",
+        "id": "1aaa1aa66d159030",
+        "text": "Several routes provide properly formatted sample data useful for documentation and testing. "
+      },
+      "date": 1547431876567
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "a3cabf3cf4a4fac0"
+      },
+      "id": "a3cabf3cf4a4fac0",
+      "type": "add",
+      "after": "1aaa1aa66d159030",
+      "date": 1547431878837
+    },
+    {
+      "type": "edit",
+      "id": "a3cabf3cf4a4fac0",
+      "item": {
+        "type": "code",
+        "id": "a3cabf3cf4a4fac0",
+        "text": "/plugin/datalog/random"
+      },
+      "date": 1547431900879
+    },
+    {
+      "type": "edit",
+      "id": "a3cabf3cf4a4fac0",
+      "item": {
+        "type": "code",
+        "id": "a3cabf3cf4a4fac0",
+        "text": "/plugin/datalog/random\n/plugin/datalog/waves"
+      },
+      "date": 1547431941399
+    }
+  ]
+}
