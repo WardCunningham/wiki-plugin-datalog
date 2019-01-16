@@ -51,6 +51,18 @@
       return `${argv.assets}/plugins/datalog/${slug}/${utc(new Date(clock),chunk)}.log`
     }
 
+    function msec (chunk, offset) {
+      const minute = 60000,
+        hour = 60*minute,
+        day = 24*hour,
+        month = 30*day,
+        year = 365*day
+      if (chunk == 'hour') return offset*hour
+      if (chunk == 'day') return offset*day
+      if (chunk == 'month') return offset*month
+      return offset*year
+    }
+
     function activate(slugitem) {
 
       console.log('activate', slugitem)
@@ -83,15 +95,26 @@
           ])
           .then(response => response.json())
           .then(data => ({name, data}))
-          .catch(error => console.log(error)||{})
+          .catch(error => console.log(error.message)||{})
         )
         Promise.all(queries)
           .then(result => save({clock,result}))
       }
 
+      var previous = null
+
       function save(result) {
         let payload = JSON.stringify(result)
-        fs.appendFile(logfile(slug, result.clock, chunk), `${payload}\n`)
+        let current = logfile(slug, result.clock, chunk)
+        fs.appendFile(current, `${payload}\n`)
+        if (current != previous) {
+          previous = current
+          let retire = logfile(slug, result.clock - msec(chunk, keep), chunk)
+          console.log('retire', retire)
+          fs.unlink(retire,(err) => {
+            if(err) console.log('retire', err.message)
+          })
+        }
       }
 
       sample()
@@ -145,6 +168,9 @@
         hour = 60*minute,
         day = 24*hour,
         month = 30*day
+
+
+    // app.get('/plugin/datalog/:slug/:chunk(hour|day|month)/:offset(\d+)', (req, res) => {
 
     app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
       return res.sendFile(logfile(req.params.slug,Date.now()-(hour*req.params.offset),'hour'))
