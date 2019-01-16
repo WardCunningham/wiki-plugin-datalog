@@ -11,6 +11,11 @@
   var scheds = {} // "slug/item" => schedule
   var timers = {} // "slug/item" => timer
 
+  function cors (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*')
+    next()
+  }
+
   function decimal(number, digits) {
     var result = []
     for (var i = 0; i < digits; i++) {
@@ -95,7 +100,7 @@
           ])
           .then(response => response.json())
           .then(data => ({name, data}))
-          .catch(error => console.log(error.message)||{})
+          .catch(error => console.log('sample', error.message)||{})
         )
         Promise.all(queries)
           .then(result => save({clock,result}))
@@ -106,7 +111,7 @@
       function save(result) {
         let payload = JSON.stringify(result)
         let current = logfile(slug, result.clock, chunk)
-        fs.appendFile(current, `${payload}\n`)
+        fs.appendFile(current, `${payload}\n`, (err)=>{if(err)console.log('append', err.message)})
         if (current != previous) {
           previous = current
           let retire = logfile(slug, result.clock - msec(chunk, keep), chunk)
@@ -172,19 +177,19 @@
 
     // app.get('/plugin/datalog/:slug/:chunk(hour|day|month)/:offset(\d+)', (req, res) => {
 
-    app.get('/plugin/datalog/:slug/hour/:offset', (req, res) => {
+    app.get('/plugin/datalog/:slug/hour/:offset', cors, (req, res) => {
       return res.sendFile(logfile(req.params.slug,Date.now()-(hour*req.params.offset),'hour'))
     })
 
-    app.get('/plugin/datalog/:slug/day/:offset', (req, res) => {
+    app.get('/plugin/datalog/:slug/day/:offset', cors, (req, res) => {
       return res.sendFile(logfile(req.params.slug,Date.now()-(day*req.params.offset),'day'))
     })
 
-    app.get('/plugin/datalog/:slug/month/:offset', (req, res) => {
+    app.get('/plugin/datalog/:slug/month/:offset', cors, (req, res) => {
       return res.sendFile(logfile(req.params.slug,Date.now()-(month*req.params.offset),'month'))
     })
 
-    app.get('/plugin/datalog/random', (req, res) => {
+    app.get('/plugin/datalog/random', cors, (req, res) => {
       let tries = [1,2,3,4,5,6]
       let sample = {
         uniform: Math.random(),
@@ -193,7 +198,7 @@
       res.send(JSON.stringify(sample))
     })
 
-    app.get('/plugin/datalog/waves', (req, res) => {
+    app.get('/plugin/datalog/waves', cors, (req, res) => {
       let angle=Date.now()/(3*60*1000)*2*Math.PI
       let sample = {
         sin: Math.sin(angle),
