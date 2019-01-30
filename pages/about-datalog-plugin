@@ -65,6 +65,11 @@
       "type": "paragraph",
       "id": "37900b49a95400cc",
       "text": "See [[More About Managing Datalogs]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "70581a4adcbf5332",
+      "text": "See [[More About Timing Accuracy]]"
     }
   ],
   "journal": [
@@ -434,6 +439,17 @@
         "text": "See [[More About Managing Datalogs]]"
       },
       "date": 1547429467898
+    },
+    {
+      "type": "add",
+      "id": "70581a4adcbf5332",
+      "item": {
+        "type": "paragraph",
+        "id": "70581a4adcbf5332",
+        "text": "See [[More About Timing Accuracy]]"
+      },
+      "after": "37900b49a95400cc",
+      "date": 1548821113596
     }
   ]
 }
