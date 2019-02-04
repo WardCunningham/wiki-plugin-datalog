@@ -150,8 +150,17 @@
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
+    function owner(req, res, next) {
+      if(app.securityhandler.isAuthorized(req)) {
+        next()
+      } else {
+        res.status(403).send({
+          error: 'operation reserved for site owner'
+        })
+      }
+    }
 
-    app.post('/plugin/datalog/:slug/id/:id/', (req, res) => {
+    app.post('/plugin/datalog/:slug/id/:id/', owner, (req, res) => {
       let slug = req.params['slug']
       let item = req.params['id']
       let slugitem = `${slug}/${item}`
