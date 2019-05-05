@@ -3,10 +3,12 @@
 
 "use strict";
 
+
 (function() {
 
   const fs = require('fs')
   const fetch = require("node-fetch")
+  const exec = require('child_process').exec
 
   var scheds = {} // "slug/item" => schedule
   var timers = {} // "slug/item" => timer
@@ -214,6 +216,21 @@
         cos: Math.cos(angle)
       }
       res.send(JSON.stringify(sample))
+    })
+
+    app.get('/plugin/datalog/curl', cors, (req, res) => {
+      console.log(req.query)
+      let curl = `curl -m 5 -s '${req.query.url}'`
+      let t0 = Date.now()
+      exec(curl, (err, stdout, stderr) => {
+        let sample = {
+          exit: err ? err.code : 0,
+          time: Date.now() - t0,
+          stdout: stdout.length,
+          stderr: stderr.length
+        }
+        res.send(JSON.stringify(sample))
+      })
     })
 
   }

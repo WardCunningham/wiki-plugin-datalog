@@ -69,7 +69,7 @@
     {
       "type": "code",
       "id": "a3cabf3cf4a4fac0",
-      "text": "/plugin/datalog/random\n/plugin/datalog/waves"
+      "text": "/plugin/datalog/random\n/plugin/datalog/waves\n/plugin/datalog/curl?url=fed.wiki.org"
     }
   ],
   "journal": [
@@ -431,6 +431,16 @@
         "text": "/plugin/datalog/random\n/plugin/datalog/waves"
       },
       "date": 1547431941399
+    },
+    {
+      "type": "edit",
+      "id": "a3cabf3cf4a4fac0",
+      "item": {
+        "type": "code",
+        "id": "a3cabf3cf4a4fac0",
+        "text": "/plugin/datalog/random\n/plugin/datalog/waves\n/plugin/datalog/curl?url=fed.wiki.org"
+      },
+      "date": 1557016232626
     }
   ]
 }

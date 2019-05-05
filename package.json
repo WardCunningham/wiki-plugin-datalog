@@ -1,6 +1,6 @@
 {
   "name": "wiki-plugin-datalog",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Federated Wiki - Datalog Plugin",
   "keywords": [
     "datalog",
@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "expect.js": "^0.3.1",
-    "grunt": "^1.0.1",
+    "grunt": "^1.0.4",
     "grunt-contrib-coffee": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-git-authors": "^3.2.0",
