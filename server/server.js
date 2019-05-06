@@ -98,7 +98,7 @@
         let queries = Object.keys(sites).map((name) =>
           Promise.race([
             fetch(sites[name]),
-            timeout(2000)
+            timeout(3100)
           ])
           .then(response => response.json())
           .then(data => ({name, data}))
@@ -220,7 +220,7 @@
 
     app.get('/plugin/datalog/curl', cors, (req, res) => {
       console.log(req.query)
-      let curl = `curl -m 5 -s '${req.query.url}'`
+      let curl = `curl -m 3 -s '${req.query.url}'`
       let t0 = Date.now()
       exec(curl, (err, stdout, stderr) => {
         let sample = {
