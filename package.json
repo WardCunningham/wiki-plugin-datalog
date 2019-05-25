@@ -1,6 +1,6 @@
 {
   "name": "wiki-plugin-datalog",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Federated Wiki - Datalog Plugin",
   "keywords": [
     "datalog",

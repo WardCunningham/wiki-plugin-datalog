@@ -41,6 +41,14 @@
   }
 
   function emit($item, item) {
+
+    $item.addClass('server-source')
+    $item.get(0).service = () => {
+      let site = location.host
+      let slug = $page.attr('id').split('_')[0]
+      return {site, slug, id:item.id, plugin: 'datalog', parse: parse(item.text)}
+    }
+
     let parsed = parse(item.text)
     $item.append(`
       <div style="background-color:#eee; padding:15px; margin-block-start:1em; margin-block-end:1em;">
