@@ -10,9 +10,6 @@
   const fetch = require("node-fetch")
   const exec = require('child_process').exec
 
-  var scheds = {} // "slug/item" => schedule
-  var timers = {} // "slug/item" => timer
-
   function cors (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
     next()
@@ -43,6 +40,9 @@
     var app = params.app,
         argv = params.argv,
         assets = argv.assets
+
+    var scheds = {} // "slug/item" => schedule
+    var timers = {} // "slug/item" => timer
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
