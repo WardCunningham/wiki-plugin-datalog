@@ -9,6 +9,7 @@
   const fs = require('fs')
   const fetch = require("node-fetch")
   const exec = require('child_process').exec
+  const events = require('events')
 
   function cors (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
@@ -43,6 +44,22 @@
 
     var scheds = {} // "slug/item" => schedule
     var timers = {} // "slug/item" => timer
+
+    var emitters = emittersFor(app) // "slug/item" => emitter
+
+    function emittersFor (app) {
+      if (!app.serviceEmitters) {
+        app.serviceEmitters = {}
+      }
+      return app.serviceEmitters
+    }
+
+    function emitterFor (slugitem) {
+      if (!emitters[slugitem]) {
+        emitters[slugitem] = new events.EventEmitter()
+      }
+      return emitters[slugitem]
+    }
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -113,7 +130,12 @@
       function save(result) {
         let payload = JSON.stringify(result)
         let current = logfile(slug, result.clock, chunk)
-        fs.appendFile(current, `${payload}\n`, (err)=>{if(err)console.log('append', err.message)})
+        let emitter = emitterFor(slugitem)
+        emitter.emit('sample',result)
+        fs.appendFile(current, `${payload}\n`, (err)=>{
+          if(err)console.log('append', err.message)
+          emitter.emit('append',current)
+        })
         if (current != previous) {
           previous = current
           let retire = logfile(slug, result.clock - msec(chunk, keep), chunk)
