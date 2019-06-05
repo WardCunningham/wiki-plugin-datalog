@@ -41,13 +41,18 @@
   }
 
   function emit($item, item) {
-
-    $item.addClass('server-source')
-    $item.get(0).service = () => {
+    let $page = $item.parents('.page')
+    if (!($page.hasClass('local') || $page.hasClass('remote'))) {
+      $item.addClass('server-source')
       let site = location.host
       let slug = $page.attr('id').split('_')[0]
-      return {site, slug, id:item.id, plugin: 'datalog', parse: parse(item.text)}
+      let title = $page.find('h1').text().trim()
+      let sensors = Object.keys(parse(item.text).schedule.sites)
+      $item.get(0).service = () => {
+        return {site, slug, title, id:item.id, plugin: 'datalog', sensors}
+      }
     }
+
 
     let parsed = parse(item.text)
     $item.append(`
