@@ -40,7 +40,40 @@
   function startServer(params) {
     var app = params.app,
         argv = params.argv,
-        assets = argv.assets
+        assets = argv.assets,
+        sockets = [];
+    app.io.on('connection', (socket) => {
+      let listeners = []
+      sockets.push(socket)
+      console.log('connected')
+      socket.on('disconnect', () => {
+        for (let {slugItem, listener} of listeners) {
+          console.log('deregistering', slugItem)
+          // TODO: Handle case when emitter has been removed
+          console.log(typeof(emitters[slugItem]))
+          console.dir({emitter: emitters[slugItem]})
+          emitters[slugItem].removeListener('sample', listener)
+        }
+        console.log('size before:', sockets.length)
+        let i = sockets.indexOf(socket)
+        sockets.splice(i, 1)
+        console.log('size after:', sockets.length)
+      })
+      socket.on('subscribe', (slugItem) => {
+        let listener = (result) => {
+          console.log('forwarding to client', result)
+          socket.emit(slugItem, result)
+        }
+        if (slugItem in emitters) {
+          emitters[slugItem].on('sample', listener)
+          listeners.push({slugItem, listener})
+        }
+        else {
+          // TODO: Handle case when emitter added later
+          console.log(`warn: no server side emitter for ${slugItem}`)
+        }
+      })
+    })
 
     var scheds = {} // "slug/item" => schedule
     var timers = {} // "slug/item" => timer

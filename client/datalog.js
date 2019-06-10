@@ -58,11 +58,35 @@
     $item.append(`
       <div style="background-color:#eee; padding:15px; margin-block-start:1em; margin-block-end:1em;">
         ${parsed.output}
-        <center><button disabled>wait</button></center>
+        <center><span>\u25CF</span><button disabled>wait</button></center>
       </div>`);
   };
 
+  var loadSocketIO = true
   function bind($item, item) {
+    new Promise((resolve, reject) => {
+      if (loadSocketIO) {
+        loadSocketIO = false
+        $.getScript('/socket.io/socket.io.js').done(() => {
+          console.log('socket.io loaded successfully!')
+          var socket = io()
+          window.socket = socket
+          resolve(socket)
+        }).fail(() => {
+          console.log('unable to load socket.io')
+          reject(Error('unable to load socket.io'))
+        })
+      }
+    }).then((socket) => {
+      let {slug, id} = $item.get(0).service()
+      let slugItem = `${slug}/${id}`
+      console.log(`subscribing to ${slugItem}`)
+      socket.emit('subscribe', slugItem)
+      socket.on(slugItem, (result) => {
+        $item.find('span').fadeOut(250).fadeIn(250)
+        //console.log('received', result)
+      })
+    })
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
     });
