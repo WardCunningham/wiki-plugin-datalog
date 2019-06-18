@@ -40,6 +40,8 @@
     return {output, schedule}
   }
 
+  const produces = ['.server-source']
+
   function emit($item, item) {
     let $page = $item.parents('.page')
     if (!($page.hasClass('local') || $page.hasClass('remote'))) {
@@ -121,7 +123,7 @@
   }
 
   if (typeof window !== "undefined" && window !== null) {
-    window.plugins.datalog = {emit, bind};
+    window.plugins.datalog = {produces, emit, bind};
   }
 
   if (typeof module !== "undefined" && module !== null) {
