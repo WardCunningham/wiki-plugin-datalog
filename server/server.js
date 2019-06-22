@@ -144,7 +144,7 @@
       // }
 
       function sample() {
-
+        console.log('sampling', {sites})
         let clock = Date.now()
         let queries = Object.keys(sites).map((name) =>
           Promise.race([
@@ -288,6 +288,7 @@
         timeout(3000)
       ])
       .then(response => {
+        console.log('response received:', response)
         if (!response.ok && !response.status==302) {
           return send({exit: 1, error: response.statusText, code: response.status})
         }

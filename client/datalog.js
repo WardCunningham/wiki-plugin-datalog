@@ -64,6 +64,11 @@
       </div>`);
   };
 
+  class PluginEvent extends Event {
+    constructor(type, props) {
+    }
+  }
+
   var loadSocketIO = true
   function bind($item, item) {
     new Promise((resolve, reject) => {
@@ -86,6 +91,7 @@
       socket.emit('subscribe', slugItem)
       socket.on(slugItem, (result) => {
         $item.find('span').fadeOut(250).fadeIn(250)
+        document.dispatchEvent(new Event('.server-source', {slugItem, result}))
         //console.log('received', result)
       })
     })
