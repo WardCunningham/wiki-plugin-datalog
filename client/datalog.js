@@ -66,33 +66,35 @@
 
   class PluginEvent extends Event {
     constructor(type, props) {
+      super(type)
+      this.slugItem = props.slugItem
+      this.result = props.result
     }
   }
 
-  var loadSocketIO = true
+  var loadSocketIO = new Promise((resolve, reject) => {
+    $.getScript('/socket.io/socket.io.js').done(() => {
+      console.log('socket.io loaded successfully!')
+      var socket = io()
+      window.socket = socket
+      resolve(socket)
+    }).fail(() => {
+      console.log('unable to load socket.io')
+      reject(Error('unable to load socket.io'))
+    })
+  })
   function bind($item, item) {
-    new Promise((resolve, reject) => {
-      if (loadSocketIO) {
-        loadSocketIO = false
-        $.getScript('/socket.io/socket.io.js').done(() => {
-          console.log('socket.io loaded successfully!')
-          var socket = io()
-          window.socket = socket
-          resolve(socket)
-        }).fail(() => {
-          console.log('unable to load socket.io')
-          reject(Error('unable to load socket.io'))
+    loadSocketIO.then((socket) => {
+      $item.get().forEach(item => {
+        let {slug, id} = item.service()
+        let slugItem = `${slug}/${id}`
+        console.log(`subscribing to ${slugItem}`)
+        socket.emit('subscribe', slugItem)
+        socket.on(slugItem, (result) => {
+          $item.find('span').fadeOut(250).fadeIn(250)
+          document.dispatchEvent(new PluginEvent('.server-source', {slugItem, result}))
+          //console.log('received', result)
         })
-      }
-    }).then((socket) => {
-      let {slug, id} = $item.get(0).service()
-      let slugItem = `${slug}/${id}`
-      console.log(`subscribing to ${slugItem}`)
-      socket.emit('subscribe', slugItem)
-      socket.on(slugItem, (result) => {
-        $item.find('span').fadeOut(250).fadeIn(250)
-        document.dispatchEvent(new Event('.server-source', {slugItem, result}))
-        //console.log('received', result)
       })
     })
     $item.dblclick(() => {
