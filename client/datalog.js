@@ -72,6 +72,7 @@
     }
   }
 
+  const producers = []
   var loadSocketIO = new Promise((resolve, reject) => {
     $.getScript('/socket.io/socket.io.js').done(() => {
       console.log('socket.io loaded successfully!')
@@ -85,17 +86,26 @@
   })
   function bind($item, item) {
     loadSocketIO.then((socket) => {
-      $item.get().forEach(item => {
-        let {slug, id} = item.service()
-        let slugItem = `${slug}/${id}`
+      let {slug, id} = $item[0].service()
+      let slugItem = `${slug}/${id}`
+      if (producers.indexOf(slugItem) == -1) {
+        producers.push(slugItem)
         console.log(`subscribing to ${slugItem}`)
         socket.emit('subscribe', slugItem)
-        socket.on(slugItem, (result) => {
+        let listener = (result) => {
+          let currentSlugItem = `${$item.parents(".page:first").attr('id').split('_')[0]}/${item.id}`
+          if (currentSlugItem != slugItem) {
+            // The item has been moved, unregister the listener for the old location.
+            console.log("Unregistering listener for", slugItem)
+            socket.off(slugItem, listener)
+            return
+          }
           $item.find('span').fadeOut(250).fadeIn(250)
           document.dispatchEvent(new PluginEvent('.server-source', {slugItem, result}))
           //console.log('received', result)
-        })
-      })
+        }
+        socket.on(slugItem, listener)
+      }
     })
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
