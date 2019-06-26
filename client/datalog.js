@@ -51,7 +51,7 @@
       let title = $page.find('h1').text().trim()
       let sensors = Object.keys(parse(item.text).schedule.sites)
       $item.get(0).service = () => {
-        return {site, slug, title, id:item.id, plugin: 'datalog', sensors}
+        return {site, page: $page.data('key'), slug, title, id:item.id, plugin: 'datalog', sensors}
       }
     }
 
@@ -67,16 +67,60 @@
   class PluginEvent extends Event {
     constructor(type, props) {
       super(type)
-      this.slugItem = props.slugItem
+      this.pageItem = props.pageItem
       this.result = props.result
     }
   }
 
+  const pageFor = (pageKey) => {
+    let $page = $('.page').filter((_i, page) => $(page).data('key') == pageKey)
+    if ($page.length == 0) return null
+    if ($page.length > 1) console.log('warning: more than one page found for', key)
+    return $page[0]
+  }
+
+  const itemFor = (pageItem) => {
+    let [pageKey, item] = pageItem.split('/')
+    let page = pageFor(pageKey)
+    if(!page) return null
+    let $item = $(page).find(`.item[data-id=${item}]`)
+    if ($item.length == 0) return null
+    if (item.length > 1) console.log('warning: more than one item found for', pageItem)
+    return $item[0]
+  }
+
   const producers = []
+  const slugItems = []
+  let listener = (result) => {
+    // for each producer
+    // find the dom element
+    producers.forEach(pageItem => {
+      let [pageKey, item] = pageItem.split('/')
+      let found = false
+      let itemElem = itemFor(pageItem)
+      if (!itemElem) {
+        // The item has been moved, unregister the listener for the old location.
+        producers.splice(produces.indexOf(pageItem), 1)
+        console.log("Unregistering listener for", pageItem)
+        socket.off(pageItem, listener)
+        return
+      }
+      $(itemElem).find('span').fadeOut(250).fadeIn(250)
+      document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
+      //console.log('received', result)
+    })
+  }
+
   var loadSocketIO = new Promise((resolve, reject) => {
     $.getScript('/socket.io/socket.io.js').done(() => {
       console.log('socket.io loaded successfully!')
       var socket = io()
+      socket.on('reconnect', () => {
+        console.log('reconnected: reregistering client side listeners', slugItems)
+        slugItems.forEach(slugItem => {
+          socket.emit('subscribe', slugItem)
+        })
+      })
       window.socket = socket
       resolve(socket)
     }).fail(() => {
@@ -86,25 +130,17 @@
   })
   function bind($item, item) {
     loadSocketIO.then((socket) => {
-      let {slug, id} = $item[0].service()
+      let {page, slug, id} = $item[0].service()
+      let pageItem = `${page}/${id}`
       let slugItem = `${slug}/${id}`
-      if (producers.indexOf(slugItem) == -1) {
-        producers.push(slugItem)
+      if (slugItems.indexOf(slugItem) == -1) {
+        slugItems.push(slugItem)
         console.log(`subscribing to ${slugItem}`)
-        socket.emit('subscribe', slugItem)
-        let listener = (result) => {
-          let currentSlugItem = `${$item.parents(".page:first").attr('id').split('_')[0]}/${item.id}`
-          if (currentSlugItem != slugItem) {
-            // The item has been moved, unregister the listener for the old location.
-            console.log("Unregistering listener for", slugItem)
-            socket.off(slugItem, listener)
-            return
-          }
-          $item.find('span').fadeOut(250).fadeIn(250)
-          document.dispatchEvent(new PluginEvent('.server-source', {slugItem, result}))
-          //console.log('received', result)
-        }
         socket.on(slugItem, listener)
+        socket.emit('subscribe', slugItem)
+      }
+      if (producers.indexOf(pageItem) == -1) {
+        producers.push(pageItem)
       }
     })
     $item.dblclick(() => {
@@ -130,6 +166,11 @@
         success: function(data){
           $button.text((data.status == 'active') ? 'stop' : 'start')
           $button.prop('disabled',false)
+          // TODO: Remove on stop
+          /*producers
+            .map(pageItem => itemFor(pageItem))
+            .filter(item => item != null)
+            .map(item => slugItemFor(item))*/
         },
         failure: function(err) {
           console.log(err)
