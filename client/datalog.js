@@ -75,32 +75,41 @@
   const pageFor = (pageKey) => {
     let $page = $('.page').filter((_i, page) => $(page).data('key') == pageKey)
     if ($page.length == 0) return null
-    if ($page.length > 1) console.log('warning: more than one page found for', key)
+    if ($page.length > 1) console.log('warning: more than one page found for', key, $page)
     return $page[0]
   }
 
-  const itemFor = (pageItem) => {
+  const itemElemFor = (pageItem) => {
     let [pageKey, item] = pageItem.split('/')
     let page = pageFor(pageKey)
     if(!page) return null
     let $item = $(page).find(`.item[data-id=${item}]`)
     if ($item.length == 0) return null
-    if (item.length > 1) console.log('warning: more than one item found for', pageItem)
+    if ($item.length > 1) console.log('warning: more than one item found for', pageItem, $item)
     return $item[0]
+  }
+
+  const slugItemFor = (itemElem) => {
+    let slug = $(itemElem).parents('.page:first').attr('id').split('_')[0]
+    let id = $(itemElem).attr('data-id')
+    let slugItem = `${slug}/${id}`
+    return slugItem
   }
 
   const producers = []
   const slugItems = []
   let listener = (result) => {
+    //console.log('in listener', result)
     // for each producer
     // find the dom element
+    //console.log('producers', producers, producers.length, slugItems)
     producers.forEach(pageItem => {
       let [pageKey, item] = pageItem.split('/')
-      let found = false
-      let itemElem = itemFor(pageItem)
+      let itemElem = itemElemFor(pageItem)
+      console.log('item is', itemElem)
       if (!itemElem) {
         // The item has been moved, unregister the listener for the old location.
-        producers.splice(produces.indexOf(pageItem), 1)
+        producers.splice(producers.indexOf(pageItem), 1)
         console.log("Unregistering listener for", pageItem)
         socket.off(pageItem, listener)
         return
@@ -141,11 +150,12 @@
       }
       if (producers.indexOf(pageItem) == -1) {
         producers.push(pageItem)
+        console.log('adding producer', pageItem, producers)
       }
     })
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
-    });
+    })
 
     let $button = $item.find('button')
     let parsed = parse(item.text)
@@ -157,20 +167,40 @@
         return
       }
       slug = $page.attr('id').split('_')[0]
+      let slugItem = `${slug}/${item.id}`
+      let pageItem = `${$page.data('key')}/${item.id}`
       $.ajax({
         type: "POST",
         url: `/plugin/datalog/${slug}/id/${item.id}`,
         data: JSON.stringify(command),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
-        success: function(data){
+        success: function(data) {
+          console.log('action', producers, slugItems)
           $button.text((data.status == 'active') ? 'stop' : 'start')
           $button.prop('disabled',false)
-          // TODO: Remove on stop
-          /*producers
-            .map(pageItem => itemFor(pageItem))
-            .filter(item => item != null)
-            .map(item => slugItemFor(item))*/
+          if (data.status != 'active') {
+            let count = 0
+            for (producer of producers) {
+              if (producer == pageItem) {
+                producers.splice(producers.indexOf(pageItem), 1)
+              }
+              let itemElem = itemElemFor(pageItem)
+              console.log(itemElem)
+              if (itemElem != null) {
+                let pageSlugItem = slugItemFor(itemElem)
+                console.log(pageSlugItem, slugItem)
+                if (pageSlugItem == slugItem) {
+                  count += 1
+                }
+              }
+            }
+            console.log('count', count)
+            if (count == 1) {
+              console.log('removing', slugItem, 'as its last consumer was removed')
+              slugItems.splice(slugItems.indexOf(slugItem), 1)
+            }
+          }
         },
         failure: function(err) {
           console.log(err)
