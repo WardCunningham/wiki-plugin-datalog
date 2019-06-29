@@ -98,7 +98,7 @@
 
   const producers = []
   const slugItems = []
-  let listener = (result) => {
+  let listener = ({slugItem, result}) => {
     //console.log('in listener', result)
     // for each producer
     // find the dom element
@@ -114,6 +114,7 @@
         socket.off(pageItem, listener)
         return
       }
+      if (slugItem != slugItemFor(itemElem)) return
       $(itemElem).find('span').fadeOut(250).fadeIn(250)
       document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
       //console.log('received', result)
@@ -137,22 +138,28 @@
       reject(Error('unable to load socket.io'))
     })
   })
+
+  const registerHandler = ({slugItem, pageItem, socket}) => {
+    if (slugItems.indexOf(slugItem) == -1) {
+      slugItems.push(slugItem)
+      console.log(`subscribing to ${slugItem}`)
+      socket.on(slugItem, listener)
+      socket.emit('subscribe', slugItem)
+    }
+    if (producers.indexOf(pageItem) == -1) {
+      producers.push(pageItem)
+      console.log('adding producer', pageItem, producers)
+    }
+  }
+
   function bind($item, item) {
-    loadSocketIO.then((socket) => {
+    let bound = loadSocketIO.then((socket) => {
       let {page, slug, id} = $item[0].service()
       let pageItem = `${page}/${id}`
       let slugItem = `${slug}/${id}`
-      if (slugItems.indexOf(slugItem) == -1) {
-        slugItems.push(slugItem)
-        console.log(`subscribing to ${slugItem}`)
-        socket.on(slugItem, listener)
-        socket.emit('subscribe', slugItem)
-      }
-      if (producers.indexOf(pageItem) == -1) {
-        producers.push(pageItem)
-        console.log('adding producer', pageItem, producers)
-      }
+      return {slugItem, pageItem, socket}
     })
+    bound.then(registerHandler)
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
     })
@@ -179,6 +186,9 @@
           console.log('action', producers, slugItems)
           $button.text((data.status == 'active') ? 'stop' : 'start')
           $button.prop('disabled',false)
+          if (data.status == 'active') {
+            bound.then(registerHandler)
+          }
           if (data.status != 'active') {
             let count = 0
             for (producer of producers) {
@@ -186,19 +196,22 @@
                 producers.splice(producers.indexOf(pageItem), 1)
               }
               let itemElem = itemElemFor(pageItem)
-              console.log(itemElem)
               if (itemElem != null) {
                 let pageSlugItem = slugItemFor(itemElem)
-                console.log(pageSlugItem, slugItem)
                 if (pageSlugItem == slugItem) {
                   count += 1
                 }
               }
             }
-            console.log('count', count)
             if (count == 1) {
               console.log('removing', slugItem, 'as its last consumer was removed')
               slugItems.splice(slugItems.indexOf(slugItem), 1)
+              bound.then(({slugItem, pageItem, socket}) => {
+                console.log('cleaning up', slugItem)
+                socket.off(slugItem, listener)
+                socket.emit('unsubscribe', slugItem)
+              })
+              console.log({slugItems, producers})
             }
           }
         },

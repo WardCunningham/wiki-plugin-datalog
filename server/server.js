@@ -59,10 +59,20 @@
         sockets.splice(i, 1)
         console.log('size after:', sockets.length)
       })
+      socket.on('unsubscribe', (targetSlugItem) => {
+        console.log('unsubscribing listener for', targetSlugItem)
+        for (let [i, {slugItem, listener}] of listeners.entries()) {
+          if (slugItem == targetSlugItem) {
+            console.log('found listener to remove for', targetSlugItem)
+            emitters[targetSlugItem].removeListener('sample', listener)
+            listeners.splice(i, 1)
+          }
+        }
+      })
       socket.on('subscribe', (slugItem) => {
         let listener = (result) => {
           console.log('forwarding to client', result)
-          socket.emit(slugItem, result)
+          socket.emit(slugItem, {slugItem, result})
         }
         if (slugItem in emitters) {
           emitters[slugItem].on('sample', listener)
