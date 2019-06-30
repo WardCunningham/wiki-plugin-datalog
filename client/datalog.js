@@ -96,31 +96,6 @@
     return slugItem
   }
 
-  const producers = []
-  const slugItems = []
-  let listener = ({slugItem, result}) => {
-    //console.log('in listener', result)
-    // for each producer
-    // find the dom element
-    //console.log('producers', producers, producers.length, slugItems)
-    producers.forEach(pageItem => {
-      let [pageKey, item] = pageItem.split('/')
-      let itemElem = itemElemFor(pageItem)
-      console.log('item is', itemElem)
-      if (!itemElem) {
-        // The item has been moved, unregister the listener for the old location.
-        producers.splice(producers.indexOf(pageItem), 1)
-        console.log("Unregistering listener for", pageItem)
-        socket.off(pageItem, listener)
-        return
-      }
-      if (slugItem != slugItemFor(itemElem)) return
-      $(itemElem).find('span').fadeOut(250).fadeIn(250)
-      document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
-      //console.log('received', result)
-    })
-  }
-
   var loadSocketIO = new Promise((resolve, reject) => {
     $.getScript('/socket.io/socket.io.js').done(() => {
       console.log('socket.io loaded successfully!')
@@ -139,15 +114,53 @@
     })
   })
 
+  const producers = {}
+  const slugItems = []
+  let listener = ({slugItem, result}) => {
+    //console.log('in listener', result)
+    // for each producer
+    // find the dom element
+    //console.log('producers', producers, producers.length, slugItems)
+    let found = false
+    let missing = []
+    producers[slugItem].forEach(pageItem => {
+      let [pageKey, item] = pageItem.split('/')
+      let itemElem = itemElemFor(pageItem)
+      //console.log('item is', itemElem)
+      if (!itemElem) {
+        missing.push(pageItem)
+        return
+      }
+      $(itemElem).find('span').fadeOut(250).fadeIn(250)
+      document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
+      //console.log('received', result)
+    })
+    missing.forEach(pageItem => {
+      // The item has been moved, unregister the listener for the old location.
+      console.log("Removing client side listener for", pageItem)
+      producers[slugItem].splice(producers[slugItem].indexOf(pageItem), 1)
+      if (producers[slugItem].length == 0) {
+        delete producers[slugItem]
+        console.log('Removing server side listener for', slugItem)
+        slugItems.splice(slugItems.indexOf(slugItem), 1)
+        loadSocketIO.then(socket => {
+          socket.off(slugItem, listener)
+          socket.emit('unsubscribe', slugItem)
+        })
+      }
+    })
+  }
+
   const registerHandler = ({slugItem, pageItem, socket}) => {
+    if (!producers[slugItem]) producers[slugItem] = []
     if (slugItems.indexOf(slugItem) == -1) {
       slugItems.push(slugItem)
-      console.log(`subscribing to ${slugItem}`)
+      console.log(`subscribing to ${slugItem}`, slugItems)
       socket.on(slugItem, listener)
       socket.emit('subscribe', slugItem)
     }
-    if (producers.indexOf(pageItem) == -1) {
-      producers.push(pageItem)
+    if (producers[slugItem].indexOf(pageItem) == -1) {
+      producers[slugItem].push(pageItem)
       console.log('adding producer', pageItem, producers)
     }
   }
@@ -191,9 +204,9 @@
           }
           if (data.status != 'active') {
             let count = 0
-            for (producer of producers) {
+            for (producer of producers[slugItem]) {
               if (producer == pageItem) {
-                producers.splice(producers.indexOf(pageItem), 1)
+                producers[slugItem].splice(producers[slugItem].indexOf(pageItem), 1)
               }
               let itemElem = itemElemFor(pageItem)
               if (itemElem != null) {
