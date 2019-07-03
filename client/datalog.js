@@ -96,14 +96,20 @@
     return slugItem
   }
 
-  var loadSocketIO = new Promise((resolve, reject) => {
+  // map of client producers keyed by server consumers
+  // client producers are identified by their pageItem
+  // server consumers are identified by their slugItem
+  const cProducers = {}
+  const sConsumers = []
+  var withSocket = new Promise((resolve, reject) => {
     $.getScript('/socket.io/socket.io.js').done(() => {
       console.log('socket.io loaded successfully!')
       var socket = io()
       socket.on('reconnect', () => {
-        console.log('reconnected: reregistering client side listeners', slugItems)
-        slugItems.forEach(slugItem => {
-          socket.emit('subscribe', slugItem)
+        console.log('reconnected: reregistering client side listeners', sConsumers)
+        sConsumers.forEach(sConsumer => {
+          // only need to inform the server since client side listeners survive a disconnect
+          socket.emit('subscribe', sConsumer)
         })
       })
       window.socket = socket
@@ -114,63 +120,58 @@
     })
   })
 
-  const producers = {}
-  const slugItems = []
   let listener = ({slugItem, result}) => {
-    //console.log('in listener', result)
-    // for each producer
-    // find the dom element
-    //console.log('producers', producers, producers.length, slugItems)
-    let found = false
+    let sConsumer = slugItem
     let missing = []
-    producers[slugItem].forEach(pageItem => {
-      let [pageKey, item] = pageItem.split('/')
-      let itemElem = itemElemFor(pageItem)
+    cProducers[sConsumer].forEach(cProducer => {
+      let [pageKey, item] = cProducer.split('/')
+      let itemElem = itemElemFor(cProducer)
       //console.log('item is', itemElem)
       if (!itemElem) {
-        missing.push(pageItem)
+        missing.push(cProducer)
         return
       }
       $(itemElem).find('span').fadeOut(250).fadeIn(250)
-      document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
+      document.dispatchEvent(new PluginEvent('.server-source', {pageItem: cProducer, result}))
       //console.log('received', result)
     })
-    missing.forEach(pageItem => {
-      // The item has been moved, unregister the listener for the old location.
-      console.log("Removing client side listener for", pageItem)
-      producers[slugItem].splice(producers[slugItem].indexOf(pageItem), 1)
-      if (producers[slugItem].length == 0) {
-        delete producers[slugItem]
-        console.log('Removing server side listener for', slugItem)
-        slugItems.splice(slugItems.indexOf(slugItem), 1)
-        loadSocketIO.then(socket => {
-          socket.off(slugItem, listener)
-          socket.emit('unsubscribe', slugItem)
+    missing.forEach(cProducer => {
+      // The item for the producer has been moved or removed, unregister the listener.
+      console.log("Removing client side listener for", cProducer)
+      cProducers[sConsumer].splice(cProducers[sConsumer].indexOf(cProducer), 1)
+      if (cProducers[sConsumer].length == 0) {
+        delete cProducers[sConsumer]
+        console.log('Removing server side listener for', sConsumer)
+        sConsumers.splice(sConsumers.indexOf(sConsumer), 1)
+        withSocket.then(socket => {
+          // stop listening and tell the server to stop sending
+          socket.off(sConsumer, listener)
+          socket.emit('unsubscribe', sConsumer)
         })
       }
     })
   }
 
-  const registerHandler = ({slugItem, pageItem, socket}) => {
-    if (!producers[slugItem]) producers[slugItem] = []
-    if (slugItems.indexOf(slugItem) == -1) {
-      slugItems.push(slugItem)
-      console.log(`subscribing to ${slugItem}`, slugItems)
-      socket.on(slugItem, listener)
-      socket.emit('subscribe', slugItem)
+  const registerHandler = ({sConsumer, cProducer, socket}) => {
+    if (!cProducers[sConsumer]) cProducers[sConsumer] = []
+    if (sConsumers.indexOf(sConsumer) == -1) {
+      sConsumers.push(sConsumer)
+      console.log(`subscribing to ${sConsumer}`, sConsumers)
+      socket.on(sConsumer, listener)
+      socket.emit('subscribe', sConsumer)
     }
-    if (producers[slugItem].indexOf(pageItem) == -1) {
-      producers[slugItem].push(pageItem)
-      console.log('adding producer', pageItem, producers)
+    if (cProducers[sConsumer].indexOf(cProducer) == -1) {
+      cProducers[sConsumer].push(cProducer)
+      console.log('adding producer', cProducer, cProducers)
     }
   }
 
   function bind($item, item) {
-    let bound = loadSocketIO.then((socket) => {
+    let bound = withSocket.then((socket) => {
       let {page, slug, id} = $item[0].service()
-      let pageItem = `${page}/${id}`
-      let slugItem = `${slug}/${id}`
-      return {slugItem, pageItem, socket}
+      let cProducer = `${page}/${id}`
+      let sConsumer = `${slug}/${id}`
+      return {sConsumer, cProducer, socket}
     })
     bound.then(registerHandler)
     $item.dblclick(() => {
@@ -187,8 +188,8 @@
         return
       }
       slug = $page.attr('id').split('_')[0]
-      let slugItem = `${slug}/${item.id}`
-      let pageItem = `${$page.data('key')}/${item.id}`
+      let sConsumer = `${slug}/${item.id}`
+      let cProducer = `${$page.data('key')}/${item.id}`
       $.ajax({
         type: "POST",
         url: `/plugin/datalog/${slug}/id/${item.id}`,
@@ -196,7 +197,7 @@
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function(data) {
-          console.log('action', producers, slugItems)
+          console.log('action', cProducers, sConsumers)
           $button.text((data.status == 'active') ? 'stop' : 'start')
           $button.prop('disabled',false)
           if (data.status == 'active') {
@@ -204,27 +205,27 @@
           }
           if (data.status != 'active') {
             let count = 0
-            for (producer of producers[slugItem]) {
-              if (producer == pageItem) {
-                producers[slugItem].splice(producers[slugItem].indexOf(pageItem), 1)
+            for (producer of cProducers[sConsumer]) {
+              if (producer == cProducer) {
+                cProducers[sConsumer].splice(cProducers[sConsumer].indexOf(cProducer), 1)
               }
-              let itemElem = itemElemFor(pageItem)
+              let itemElem = itemElemFor(cProducer)
               if (itemElem != null) {
-                let pageSlugItem = slugItemFor(itemElem)
-                if (pageSlugItem == slugItem) {
+                let slugItem = slugItemFor(itemElem)
+                if (slugItem == sConsumer) {
                   count += 1
                 }
               }
             }
             if (count == 1) {
-              console.log('removing', slugItem, 'as its last consumer was removed')
-              slugItems.splice(slugItems.indexOf(slugItem), 1)
-              bound.then(({slugItem, pageItem, socket}) => {
-                console.log('cleaning up', slugItem)
-                socket.off(slugItem, listener)
-                socket.emit('unsubscribe', slugItem)
+              console.log('removing', sConsumer, 'as its last consumer was removed')
+              sConsumers.splice(sConsumers.indexOf(sConsumer), 1)
+              bound.then(({sConsumer, cProducer, socket}) => {
+                console.log('cleaning up', sConsumer)
+                socket.off(sConsumer, listener)
+                socket.emit('unsubscribe', sConsumer)
               })
-              console.log({slugItems, producers})
+              console.log({sConsumers, cProducers})
             }
           }
         },
