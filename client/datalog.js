@@ -40,8 +40,6 @@
     return {output, schedule}
   }
 
-  const produces = ['.server-source']
-
   function emit($item, item) {
     let $page = $item.parents('.page')
     if (!($page.hasClass('local') || $page.hasClass('remote'))) {
@@ -205,7 +203,8 @@
           }
           if (data.status != 'active') {
             let count = 0
-            for (producer of cProducers[sConsumer]) {
+            console.log('in action', sConsumer, cProducers, cProducers[sConsumer]);
+            for (producer of (cProducers[sConsumer] || [])) {
               if (producer == cProducer) {
                 cProducers[sConsumer].splice(cProducers[sConsumer].indexOf(cProducer), 1)
               }
@@ -239,7 +238,7 @@
   }
 
   if (typeof window !== "undefined" && window !== null) {
-    window.plugins.datalog = {produces, emit, bind};
+    window.plugins.datalog = {emit, bind};
   }
 
   if (typeof module !== "undefined" && module !== null) {

@@ -42,67 +42,58 @@
         argv = params.argv,
         assets = argv.assets,
         sockets = [];
+    if (!app.serviceEmitter) {
+      app.serviceEmitter = new events.EventEmitter()
+    }
     app.io.on('connection', (socket) => {
       let listeners = []
+      let emitter = app.serviceEmitter
       sockets.push(socket)
       console.log('connected')
       socket.on('disconnect', () => {
-        for (let {slugItem, listener} of listeners) {
-          console.log('deregistering', slugItem)
+        for (let {sProducer, listener} of listeners) {
+          console.log('deregistering', sProducer)
           // TODO: Handle case when emitter has been removed
-          console.log(typeof(emitters[slugItem]))
-          console.dir({emitter: emitters[slugItem]})
-          emitters[slugItem].removeListener('sample', listener)
+          emitter.removeListener(sProducer, listener)
         }
         console.log('size before:', sockets.length)
         let i = sockets.indexOf(socket)
         sockets.splice(i, 1)
         console.log('size after:', sockets.length)
       })
-      socket.on('unsubscribe', (targetSlugItem) => {
-        console.log('unsubscribing listener for', targetSlugItem)
+      socket.on('unsubscribe', (sProducer) => {
+        console.log('unsubscribing listener for', sProducer)
         for (let [i, {slugItem, listener}] of listeners.entries()) {
-          if (slugItem == targetSlugItem) {
-            console.log('found listener to remove for', targetSlugItem)
-            emitters[targetSlugItem].removeListener('sample', listener)
+          if (slugItem == sProducer) {
+            console.log('found listener to remove for', sProducer)
+            emitter.removeListener(sProducer, listener)
             listeners.splice(i, 1)
           }
         }
       })
-      socket.on('subscribe', (slugItem) => {
+      socket.on('subscribe', (sProducer) => {
         let listener = (result) => {
           console.log('forwarding to client', result)
-          socket.emit(slugItem, {slugItem, result})
+          socket.emit(sProducer, {slugItem: sProducer, result})
         }
-        if (slugItem in emitters) {
-          emitters[slugItem].on('sample', listener)
-          listeners.push({slugItem, listener})
+        let found = false;
+        for (let slugItem of Object.keys(timers)) {
+          if (slugItem === sProducer) {
+            console.log(`registering ${sProducer} as listener`)
+            emitter.on(sProducer, listener)
+            listeners.push({sProducer, listener})
+            found = true;
+          }
         }
-        else {
+        if (!found) {
           // TODO: Handle case when emitter added later
-          console.log(`warn: no server side emitter for ${slugItem}`)
+          console.log(`warn: no server side emitter for '${sProducer}' in '${Object.keys(timers)}'`)
         }
       })
     })
 
     var scheds = {} // "slug/item" => schedule
     var timers = {} // "slug/item" => timer
-
-    var emitters = emittersFor(app) // "slug/item" => emitter
-
-    function emittersFor (app) {
-      if (!app.serviceEmitters) {
-        app.serviceEmitters = {}
-      }
-      return app.serviceEmitters
-    }
-
-    function emitterFor (slugitem) {
-      if (!emitters[slugitem]) {
-        emitters[slugitem] = new events.EventEmitter()
-      }
-      return emitters[slugitem]
-    }
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -137,15 +128,15 @@
     }
 
 
-    function activate(slugitem) {
+    function activate(sProducer) {
 
-      console.log('activate', slugitem)
-      let schedule = scheds[slugitem]
+      console.log('activate', sProducer)
+      let schedule = scheds[sProducer]
       let chunk = schedule.chunk||'year'
       let keep = schedule.keep||10
       let sites = schedule.sites||{}
-      let slug = slugitem.split('/')[0]
-      let item = slugitem.split('/')[1]
+      let slug = sProducer.split('/')[0]
+      let item = sProducer.split('/')[1]
 
       mkdir(`${assets}/plugins/datalog/${slug}`)
 
@@ -174,11 +165,12 @@
       function save(result) {
         let payload = JSON.stringify(result)
         let current = logfile(slug, result.clock, chunk)
-        let emitter = emitterFor(slugitem)
-        emitter.emit('sample',result)
+        let emitter = app.serviceEmitter
+        emitter.emit(sProducer, result)
         fs.appendFile(current, `${payload}\n`, (err)=>{
           if(err)console.log('append', err.message)
-          emitter.emit('append',current)
+          // TODO: Understand use case - possibly model as event property?
+          //emitter.emit('append',current)
         })
         if (current != previous) {
           previous = current
@@ -205,16 +197,18 @@
       }
     } catch (err) { }
 
-    function start(slugitem,schedule) {
-      scheds[slugitem] = schedule
-      timers[slugitem] = activate(slugitem)
+    function start(sProducer,schedule) {
+      console.log(`starting ${sProducer}`)
+      scheds[sProducer] = schedule
+      timers[sProducer] = activate(sProducer)
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
-    function stop(slugitem) {
-      clearInterval(timers[slugitem])
-      delete timers[slugitem]
-      delete scheds[slugitem]
+    function stop(sProducer) {
+      console.log(`stopping ${sProducer}`)
+      clearInterval(timers[sProducer])
+      delete timers[sProducer]
+      delete scheds[sProducer]
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
