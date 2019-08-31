@@ -3,10 +3,10 @@
 
 "use strict";
 
-
 (function() {
 
   const fs = require('fs')
+  const v8 = require('v8')
   const fetch = require("node-fetch")
   const exec = require('child_process').exec
   const events = require('events')
@@ -266,6 +266,10 @@
       .catch(error => {
         return send({exit: 2, error: error.message})
       })
+    })
+
+    app.get('/plugin/datalog/heap', cors, (req, res) => {
+      res.json(v8.getHeapStatistics())
     })
 
   }
