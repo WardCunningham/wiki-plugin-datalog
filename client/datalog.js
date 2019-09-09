@@ -55,8 +55,9 @@
 
 
     let parsed = parse(item.text)
+    $item.addClass('output-item')
     $item.append(`
-      <div style="background-color:#eee; padding:15px; margin-block-start:1em; margin-block-end:1em;">
+      <div>
         ${parsed.output}
         <center><span>\u25CF</span><button disabled>wait</button></center>
       </div>`);
