@@ -41,57 +41,7 @@
     var app = params.app,
         argv = params.argv,
         assets = argv.assets,
-        sockets = [];
-    if (!app.serviceEmitter) {
-      app.serviceEmitter = new events.EventEmitter()
-    }
-    app.io.on('connection', (socket) => {
-      let listeners = []
-      let emitter = app.serviceEmitter
-      sockets.push(socket)
-      console.log('connected')
-      socket.on('disconnect', () => {
-        for (let {sProducer, listener} of listeners) {
-          console.log('deregistering', sProducer)
-          // TODO: Handle case when emitter has been removed
-          emitter.removeListener(sProducer, listener)
-        }
-        console.log('size before:', sockets.length)
-        let i = sockets.indexOf(socket)
-        sockets.splice(i, 1)
-        console.log('size after:', sockets.length)
-      })
-      socket.on('unsubscribe', (sProducer) => {
-        console.log('unsubscribing listener for', sProducer)
-        for (let [i, {slugItem, listener}] of listeners.entries()) {
-          if (slugItem == sProducer) {
-            console.log('found listener to remove for', sProducer)
-            emitter.removeListener(sProducer, listener)
-            listeners.splice(i, 1)
-          }
-        }
-      })
-      socket.on('subscribe', (sProducer) => {
-        let listener = (result) => {
-          console.log('forwarding to client', result)
-          socket.emit(sProducer, {slugItem: sProducer, result})
-        }
-        let found = false;
-        for (let slugItem of Object.keys(timers)) {
-          if (slugItem === sProducer) {
-            console.log(`registering ${sProducer} as listener`)
-            emitter.on(sProducer, listener)
-            listeners.push({sProducer, listener})
-            found = true;
-          }
-        }
-        if (!found) {
-          // TODO: Handle case when emitter added later
-          console.log(`warn: no server side emitter for '${sProducer}' in '${Object.keys(timers)}'`)
-        }
-      })
-    })
-
+        emitter = params.emitter;
     var scheds = {} // "slug/item" => schedule
     var timers = {} // "slug/item" => timer
 
@@ -165,7 +115,6 @@
       function save(result) {
         let payload = JSON.stringify(result)
         let current = logfile(slug, result.clock, chunk)
-        let emitter = app.serviceEmitter
         emitter.emit(sProducer, result)
         fs.appendFile(current, `${payload}\n`, (err)=>{
           if(err)console.log('append', err.message)
