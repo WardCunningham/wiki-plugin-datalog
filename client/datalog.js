@@ -76,35 +76,39 @@
       return wiki.textEditor($item, item);
     })
 
-    let $button = $item.find('button')
-    let parsed = parse(item.text)
+    promise = new Promise((resolve, _reject) => {
+      let $button = $item.find('button')
+      let parsed = parse(item.text)
 
-    function action(command) {
-      $button.prop('disabled',true)
-      $page = $item.parents('.page')
-      if($page.hasClass('local')) {
-        return
-      }
-      slug = $page.attr('id').split('_')[0]
-      let sConsumer = `${slug}/${item.id}`
-      let cProducer = `${$page.data('key')}/${item.id}`
-      $.ajax({
-        type: "POST",
-        url: `/plugin/datalog/${slug}/id/${item.id}`,
-        data: JSON.stringify(command),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function(data) {
-          $button.text((data.status == 'active') ? 'stop' : 'start')
-          $button.prop('disabled',false)
-        },
-        failure: function(err) {
-          console.log(err)
+      function action(command) {
+        $button.prop('disabled',true)
+        $page = $item.parents('.page')
+        if($page.hasClass('local')) {
+          return
         }
-      })
-    }
-    $button.click(event => action({action:$button.text(),schedule:parsed.schedule}))
-    action({})
+        slug = $page.attr('id').split('_')[0]
+        let sConsumer = `${slug}/${item.id}`
+        let cProducer = `${$page.data('key')}/${item.id}`
+        $.ajax({
+          type: "POST",
+          url: `/plugin/datalog/${slug}/id/${item.id}`,
+          data: JSON.stringify(command),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function(data) {
+            $button.text((data.status == 'active') ? 'stop' : 'start')
+            $button.prop('disabled',false)
+            resolve()
+          },
+          failure: function(err) {
+            console.log(err)
+          }
+        })
+      }
+      $button.click(event => action({action:$button.text(),schedule:parsed.schedule}))
+      action({})
+    })
+    return promise
   }
 
   processServerEvent = ($item, pageItem, result) => {
