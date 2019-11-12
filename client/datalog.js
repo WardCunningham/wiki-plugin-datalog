@@ -100,8 +100,9 @@
             $button.prop('disabled',false)
             resolve()
           },
-          failure: function(err) {
+          error: function(err) {
             console.log(err)
+            resolve()
           }
         })
       }
