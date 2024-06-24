@@ -40,26 +40,10 @@
   function startServer(params) {
     var app = params.app,
         argv = params.argv,
-        assets = argv.assets
-
+        assets = argv.assets,
+        emitter = params.emitter;
     var scheds = {} // "slug/item" => schedule
     var timers = {} // "slug/item" => timer
-
-    var emitters = emittersFor(app) // "slug/item" => emitter
-
-    function emittersFor (app) {
-      if (!app.serviceEmitters) {
-        app.serviceEmitters = {}
-      }
-      return app.serviceEmitters
-    }
-
-    function emitterFor (slugitem) {
-      if (!emitters[slugitem]) {
-        emitters[slugitem] = new events.EventEmitter()
-      }
-      return emitters[slugitem]
-    }
 
     function mkdir(dir) {
       if (!fs.existsSync(dir)){
@@ -94,15 +78,15 @@
     }
 
 
-    function activate(slugitem) {
+    function activate(sProducer) {
 
-      console.log('activate', slugitem)
-      let schedule = scheds[slugitem]
+      console.log('activate', sProducer)
+      let schedule = scheds[sProducer]
       let chunk = schedule.chunk||'year'
       let keep = schedule.keep||10
       let sites = schedule.sites||{}
-      let slug = slugitem.split('/')[0]
-      let item = slugitem.split('/')[1]
+      let slug = sProducer.split('/')[0]
+      let item = sProducer.split('/')[1]
 
       mkdir(`${assets}/plugins/datalog/${slug}`)
 
@@ -111,7 +95,7 @@
       // }
 
       function sample() {
-
+        console.log('sampling', {sites})
         let clock = Date.now()
         let queries = Object.keys(sites).map((name) =>
           Promise.race([
@@ -131,11 +115,11 @@
       function save(result) {
         let payload = JSON.stringify(result)
         let current = logfile(slug, result.clock, chunk)
-        let emitter = emitterFor(slugitem)
-        emitter.emit('sample',result)
+        emitter.emit(sProducer, result)
         fs.appendFile(current, `${payload}\n`, (err)=>{
           if(err)console.log('append', err.message)
-          emitter.emit('append',current)
+          // TODO: Understand use case - possibly model as event property?
+          //emitter.emit('append',current)
         })
         if (current != previous) {
           previous = current
@@ -162,16 +146,18 @@
       }
     } catch (err) { }
 
-    function start(slugitem,schedule) {
-      scheds[slugitem] = schedule
-      timers[slugitem] = activate(slugitem)
+    function start(sProducer,schedule) {
+      console.log(`starting ${sProducer}`)
+      scheds[sProducer] = schedule
+      timers[sProducer] = activate(sProducer)
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
-    function stop(slugitem) {
-      clearInterval(timers[slugitem])
-      delete timers[slugitem]
-      delete scheds[slugitem]
+    function stop(sProducer) {
+      console.log(`stopping ${sProducer}`)
+      clearInterval(timers[sProducer])
+      delete timers[sProducer]
+      delete scheds[sProducer]
       fs.writeFileSync(status, JSON.stringify(scheds))
     }
 
@@ -255,6 +241,7 @@
         timeout(3000)
       ])
       .then(response => {
+        console.log('response received:', response)
         if (!response.ok && !response.status==302) {
           return send({exit: 1, error: response.statusText, code: response.status})
         }

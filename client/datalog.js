@@ -49,55 +49,76 @@
       let title = $page.find('h1').text().trim()
       let sensors = Object.keys(parse(item.text).schedule.sites)
       $item.get(0).service = () => {
-        return {site, slug, title, id:item.id, plugin: 'datalog', sensors}
+        return {site, page: $page.data('key'), slug, title, id:item.id, plugin: 'datalog', sensors}
       }
     }
 
 
     let parsed = parse(item.text)
+    $item.addClass('output-item')
     $item.append(`
-      <div style="background-color:#eee; padding:15px; margin-block-start:1em; margin-block-end:1em;">
+      <div>
         ${parsed.output}
-        <center><button disabled>wait</button></center>
+        <center><span>\u25CF</span><button disabled>wait</button></center>
       </div>`);
   };
+
+  class PluginEvent extends Event {
+    constructor(type, props) {
+      super(type)
+      this.pageItem = props.pageItem
+      this.result = props.result
+    }
+  }
 
   function bind($item, item) {
     $item.dblclick(() => {
       return wiki.textEditor($item, item);
-    });
+    })
 
-    let $button = $item.find('button')
-    let parsed = parse(item.text)
+    promise = new Promise((resolve, _reject) => {
+      let $button = $item.find('button')
+      let parsed = parse(item.text)
 
-    function action(command) {
-      $button.prop('disabled',true)
-      $page = $item.parents('.page')
-      if($page.hasClass('local')) {
-        return
-      }
-      slug = $page.attr('id').split('_')[0]
-      $.ajax({
-        type: "POST",
-        url: `/plugin/datalog/${slug}/id/${item.id}`,
-        data: JSON.stringify(command),
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function(data){
-          $button.text((data.status == 'active') ? 'stop' : 'start')
-          $button.prop('disabled',false)
-        },
-        failure: function(err) {
-          console.log(err)
+      function action(command) {
+        $button.prop('disabled',true)
+        $page = $item.parents('.page')
+        if($page.hasClass('local')) {
+          return
         }
-      })
-    }
-    $button.click(event => action({action:$button.text(),schedule:parsed.schedule}))
-    action({})
+        slug = $page.attr('id').split('_')[0]
+        let sConsumer = `${slug}/${item.id}`
+        let cProducer = `${$page.data('key')}/${item.id}`
+        $.ajax({
+          type: "POST",
+          url: `/plugin/datalog/${slug}/id/${item.id}`,
+          data: JSON.stringify(command),
+          contentType: "application/json; charset=utf-8",
+          dataType: "json",
+          success: function(data) {
+            $button.text((data.status == 'active') ? 'stop' : 'start')
+            $button.prop('disabled',false)
+            resolve()
+          },
+          error: function(err) {
+            console.log(err)
+            resolve()
+          }
+        })
+      }
+      $button.click(event => action({action:$button.text(),schedule:parsed.schedule}))
+      action({})
+    })
+    return promise
+  }
+
+  processServerEvent = ($item, pageItem, result) => {
+      $item.find('span').fadeOut(250).fadeIn(250)
+      document.dispatchEvent(new PluginEvent('.server-source', {pageItem, result}))
   }
 
   if (typeof window !== "undefined" && window !== null) {
-    window.plugins.datalog = {emit, bind};
+    window.plugins.datalog = {emit, bind, processServerEvent};
   }
 
   if (typeof module !== "undefined" && module !== null) {
