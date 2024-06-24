@@ -104,6 +104,8 @@
       let slug = slugitem.split('/')[0]
       let item = slugitem.split('/')[1]
 
+      let secrets = null
+
       mkdir(`${assets}/plugins/datalog/${slug}`)
 
       // function logfile(clock) {
@@ -112,10 +114,27 @@
 
       function sample() {
 
+        function inject(url) {
+          if (url.match(/\{\{\w+\}\}/)) {
+            if (!secrets) {
+              try {
+                secrets = JSON.parse(fs.readFileSync(`${argv.status}/secrets/datalog/fetch.json`,'utf8'))
+              } catch (err) {
+                console.log('datalog inject error: ', err)
+                secrets = {}
+              }
+            }
+            let better = url.replace(/{{(\w+)}}/g, function (match, key) {return secrets[key]||'unknown'})
+            console.log('fetch',better)
+            return better
+          }
+          return url
+        }
+
         let clock = Date.now()
         let queries = Object.keys(sites).map((name) =>
           Promise.race([
-            fetch(sites[name]),
+            fetch(inject(sites[name])),
             timeout(3100)
           ])
           .then(response => response.json())
