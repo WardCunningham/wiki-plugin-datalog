@@ -72,11 +72,11 @@
 
     function action(command) {
       $button.prop('disabled',true)
-      $page = $item.parents('.page')
+      let $page = $item.parents('.page')
       if($page.hasClass('local')) {
         return
       }
-      slug = $page.attr('id').split('_')[0]
+      let slug = $page.attr('id').split('_')[0]
       $.ajax({
         type: "POST",
         url: `/plugin/datalog/${slug}/id/${item.id}`,
