@@ -185,6 +185,16 @@
       }
     }
 
+    let stats = {
+      start:Date.now(),
+      routes:0
+    }
+    const agent = (req,res,next) => {
+      stats.routes++
+      next()
+    }
+    app.use(agent)
+
     app.post('/plugin/datalog/:slug/id/:id/', owner, (req, res) => {
       let slug = req.params['slug']
       let item = req.params['id']
@@ -270,6 +280,11 @@
 
     app.get('/plugin/datalog/heap', cors, (req, res) => {
       res.json(v8.getHeapStatistics())
+    })
+
+    app.get('/plugin/datalog/stats', cors, (req, res) => {
+      const run = Date.now() - stats.start
+      res.json({...stats,run})
     })
 
   }
